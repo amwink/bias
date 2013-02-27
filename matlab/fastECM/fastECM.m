@@ -48,9 +48,14 @@ end
 % load NifTI input file
 
 fprintf('reading %s ...\n',inputfile);
-if (inputfile(1)~=filesep)
-    inputfile=[pwd filesep inputfile];
+if (inputfile(1)~=filesep)       % if path does not start with a separator
+  if (    (isunix) | ...         % and in windos not with a drive letter or '\\'
+       ( (~isunix) & (inputfile(2)~='\') & (inputfile(2)~=':') ) ...
+     )                           % make it an absolute path
+    inputfile=[pwd filesep inputfile];    
+  end
 end
+inputfile
 M=nifti(inputfile);              % read the information from the NifTI file
 m=M.dat(:,:,:,:);                % read the 4d voxel data
 tln=size(m,4);                   % store the time series length
@@ -101,9 +106,9 @@ while ((iter<100) & (dnorm>cnorm))
   vcurr=vcurr_3/norm(vcurr_3,2); % normalise L2-norm
   iter=iter+1;                   % increase iteration counter
   dnorm=norm(vcurr-vprev,2);     % L2-norm of difference prev-curr estimate
-  cnorm=norm(vcurr*eps,2);     % L2-norm of current estimate
+  cnorm=norm(vcurr*eps,2);       % L2-norm of current estimate
   fprintf('iteration %02d, || v_i - v_(i-1) || / || v_i * epsilon || = %0.16f / %0.16f\r', ...
-	  iter,dnorm,cnorm)          % some stats for the users
+	  iter,dnorm,cnorm)      % some stats for the users
 end
 fprintf('\n');
 
