@@ -55,7 +55,6 @@ if (inputfile(1)~=filesep)       % if path does not start with a separator
     inputfile=[pwd filesep inputfile];    
   end
 end
-inputfile
 M=nifti(inputfile);              % read the information from the NifTI file
 m=M.dat(:,:,:,:);                % read the 4d voxel data
 tln=size(m,4);                   % store the time series length
