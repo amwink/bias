@@ -180,12 +180,12 @@ int multiMRFWD1D( doubleVec xreal, doubleVec ximag,
 	
       } else {
 	
-	/*  prepare filter subsampling for next level                                           */
+	/*  prepare filter subsampling for next level */
+	d+=nsig;
 	Q*=2;
 	NQ/=2;
 
 	/* initialise next level: pointer to next detail signal                                 */
-	/*d+=nsig;*/
 	
 	/* facilitate skipping through filter and data */
 	Hfilter2d=(dComplexMat)dComplexMake2D(hcomp[0],NQ,Q);
@@ -197,10 +197,6 @@ int multiMRFWD1D( doubleVec xreal, doubleVec ximag,
 	  for (i=0; i<NQ; i++) {     
 	    mulcc(Detail2d[q][i],Gfilter2d[i][0],Approx2d[q][i]);
 	    mulcc(Approx2d[q][i],Hfilter2d[i][0],Approx2d[q][i]);
-	    
-	    /* printf("(%0.4f,%0.4f) (%0.4f,%0.4f)\n",
-	 	      Hfilter2d[i][0].r,Hfilter2d[i][0].i,
-		      Gfilter2d[i][0].r,Gfilter2d[i][0].i); */ 
 
 	  } /* for(i) */	
 
