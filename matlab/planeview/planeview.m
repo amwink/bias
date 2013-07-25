@@ -33,7 +33,7 @@ minval=double(min(volume(volume~=0)));
 maxval=double(max(volume(volume~=0)));
 
 if (minval==maxval)
-  maxval=maxval+1;
+  minval=minval-1;
 end;
   
 for i=1:zdim
