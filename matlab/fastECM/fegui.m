@@ -241,13 +241,46 @@ if (dname)
     txtinputs=fnames;
     fnames=[];
     for i=1:length(txtinputs)
-      lines=textread(txtinputs{i}, '%s');
-      fnames=[fnames;lines];
-    end
+      
+      tst=0;
+      lines=textread(txtinputs{i},'%s');
+      for l=1:length(lines)
+	
+	line=lines{l};
+	
+	try 
+	  tst=load_untouch_header_only(line);
+	catch, 
+	  fprintf('file %s could not be opened\n',line);
+	end
+	
+	if(isstruct(tst))
+	  fnames=[fnames;lines];
+	end
+	
+      end % for l
+      
+    end % for i
+    
   else
+    
     for i=1:length(fnames)
-      fnames{i}=[dname fnames{i}];
-    end
+      
+      tst=0;
+      
+      lines=[dname fnames{i}];
+      try 
+	tst=load_untouch_header_only(lines);
+      catch, 
+	fprintf('file %s could not be opened\n',lines);
+      end
+      
+      if(isstruct(tst))      
+	fnames{i}=lines;
+      end
+      
+    end % for i
+    
   end
   
   set(h.dv, 'string', dname);
