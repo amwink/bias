@@ -255,7 +255,7 @@ if (dname)
 	end
 	
 	if(isstruct(tst))
-	  fnames=[fnames;lines];
+	  fnames=[fnames;{line}];
 	end
 	
       end % for l
