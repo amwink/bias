@@ -226,8 +226,9 @@ exts={'*.nii;*.nii.gz;*.img;*.img.gz' 'all image types' ...
 exts=reshape(exts, 2, 6)';
 
 [fnames, dname] = uigetfile(exts, ...
-			    'select file(s) to open', ...
-			    'multiselect', 'on');
+                    'select file(s) to open', ...
+                    'multiselect', 'on', ...
+                    get(h.dv,'string') );
 
 if (dname)
 
@@ -238,12 +239,12 @@ if (dname)
   istxt=(strcmp(fnames{1}((end-3):end), '.txt'));
   
   if (istxt)
-    txtinputs=fnames;
+    txtinputs=[fnames];
     fnames=[];
     for i=1:length(txtinputs)
       
       tst=0;
-      lines=textread(txtinputs{i},'%s');
+      lines=textread([dname filesep txtinputs{i}],'%s');
       for l=1:length(lines)
 	
 	line=lines{l};
@@ -269,9 +270,10 @@ if (dname)
       tst=0;
       
       lines=[dname fnames{i}];
+      
       try 
 	tst=load_untouch_header_only(lines);
-      catch, 
+      catch 
 	fprintf('file %s could not be opened\n',lines);
       end
       
@@ -301,7 +303,8 @@ return
 function savfiles(callingObject, event, h);
 
   [fname, dname] = uiputfile({'*.txt', 'txt files'}, ...
-			     'file to save to', 'fegui.txt');
+                    'file to save to', ...
+                    [get(h.dv,'string') filesep 'fegui.txt']);
   
   if (fname)
     
@@ -373,7 +376,8 @@ return
 function sav(callingObject, event, h);
 
   [fname, dname] = uiputfile({'*.txt;*.log', 'txt / log files'}, ...
-			     'file to save to', 'fastECM.log');
+                    'file to save to', ...
+                    [get(h.dv,'string') filesep 'fastECM.log']);
   if (fname)
     
     fid = fopen([dname filesep fname], 'w');
@@ -392,7 +396,7 @@ return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
-% offer to save or clear the output log
+% clear the output log
 %
 
 function clr(h);
