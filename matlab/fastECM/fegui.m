@@ -7,17 +7,17 @@ function fegui;
 %
 % If you use this program in your research, remember to cite this paper
 % in the journal "Brain Connectivity":
-% 
+%
 % Alle Meije Wink, Jan C de Munck, Ysbrand D van der Werf, Odile A van den heuvel, Frederik Barkhof
 % "Fast eigenvector centrality mapping of voxel-wise connectivity in functional MRI: implementation, validation and interpretation."
 % URL: http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0087
 %
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % build the window & gui objects
 %
-
+  
 % delete existing guis and make current one
 fegui=findobj('tag', 'fegui');
 delete(fegui);
@@ -35,7 +35,7 @@ h.dc = uicontrol (fegui, ...
 		  'horizontalalignment', 'left', ...
 		  'tooltipstring', 'current directory / directory of latest added files', ...
 		  'backgroundcolor', [.8 .8 .8], ...
-			 'position', [.05 .9 .4 .05]);
+		  'position', [.05 .9 .4 .05]);
 
 h.dv = uicontrol (fegui, ...
 		  'style', 'edit', ...
@@ -176,123 +176,125 @@ set(h.ie, 'callback', {@upd_slider, h});
 set(h.iv, 'callback', {@upd_edit, h});
 set(h.ov, 'callback', {@sav, h});
 set(h.ov, 'buttondownfcn', @(s, e)clr(h));
-
+  
 return;
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % execute fastECM on the selected files with selected options
 %
 
 function doecm(callingObject, event, h);
-
-fnames = get(h.fv, 'string');
-
-if ~strcmp(fnames, '')
-  dorank=get(h.rv, 'value');
-  donorm=get(h.nv, 'value');
-  maxiter=get(h.iv, 'value');
-  set(h.ov, 'string', '');
-  set(h.ov, 'value', 1);
-  drawnow;
-  for i=1:length(fnames)
-    cmd=sprintf('fastECM(''%s'', %d, %d, %d)', fnames{i}, dorank, donorm, maxiter);
-    set(h.ov, 'string', [get(h.ov, 'string');{['running ' cmd ' ...']}]);
-    set(h.ov, 'listboxtop', length(get(h.ov, 'string')))
+  
+  fnames = get(h.fv, 'string');
+  
+  if ~strcmp(fnames, '')
+    dorank=get(h.rv, 'value');
+    donorm=get(h.nv, 'value');
+    maxiter=get(h.iv, 'value');
+    set(h.ov, 'string', '');
+    set(h.ov, 'value', 1);
     drawnow;
-    cmdlog=evalc(cmd);
-    cmdlog=strread(cmdlog, '%s', 'delimiter', '\n');
-    set(h.ov, 'string', [get(h.ov, 'string');cmdlog]);
-    drawnow;
+    for i=1:length(fnames)
+      cmd=sprintf('fastECM(''%s'', %d, %d, %d)', fnames{i}, dorank, donorm, maxiter);
+      set(h.ov, 'string', [get(h.ov, 'string');{['running ' cmd ' ...']}]);
+      set(h.ov, 'listboxtop', length(get(h.ov, 'string')))
+      drawnow;
+      cmdlog=evalc(cmd);
+      cmdlog=strread(cmdlog, '%s', 'delimiter', '\n');
+      set(h.ov, 'string', [get(h.ov, 'string');cmdlog]);
+      drawnow;
+    end
   end
-end
   
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % select more files to be analysed
 %
 
 function getfiles(callingObject, event, h);
-
-exts={'*.nii;*.nii.gz;*.img;*.img.gz' 'all image types' ...
-      '*.nii'         'nifti files'                     ... 
-      '*.nii.gz'      'compressed nifti files'          ...
-      '*.img'         'analyze files'                   ...
-      '*.img.gz'      'compressed analyze files'        ...
-      '*.txt'         'text files with file names'      };    
-
-exts=reshape(exts, 2, 6)';
-
-[fnames, dname] = uigetfile(exts, ...
-                    'select file(s) to open', ...
-                    'multiselect', 'on', ...
-                    get(h.dv,'string') );
-
-if (dname)
-
-  if ~iscell(fnames)
-    fnames={fnames};
-  end
-    
-  istxt=(strcmp(fnames{1}((end-3):end), '.txt'));
   
-  if (istxt)
-    txtinputs=[fnames];
-    fnames=[];
-    for i=1:length(txtinputs)
+  exts={'*.nii;*.nii.gz;*.img;*.img.gz' 'all image types' ...
+	'*.nii'         'nifti files'                     ...
+	'*.nii.gz'      'compressed nifti files'          ...
+	'*.img'         'analyze files'                   ...
+	'*.img.gz'      'compressed analyze files'        ...
+	'*.txt'         'text files with file names'      };
+  
+  exts=reshape(exts, 2, 6)';
+  
+  [fnames, dname] = uigetfile(exts, ...
+			      'select file(s) to open', ...
+			      'multiselect', 'on', ...
+			      get(h.dv,'string') );
+  
+  if (dname)
+    
+    if ~iscell(fnames)
+      fnames={fnames};
+    end
+    
+    istxt=(strcmp(fnames{1}((end-3):end), '.txt'));
+    
+    if (istxt)
+      txtinputs=[fnames];
+      fnames=[];
+      for i=1:length(txtinputs)
+	
+	tst=0;
+	lines=textread([dname filesep txtinputs{i}],'%s');
+	for l=1:length(lines)
+	  
+	  line=lines{l};
+	  
+	  try
+	    tst=load_untouch_header_only(line);
+	  catch,
+	    fprintf('file %s could not be opened\n',line);
+	  end
+	  
+	  if(isstruct(tst))
+	    fnamelist=get(h.fv, 'string');
+	    fnamelist{end+1}=line;
+	    set(h.fv, 'string', fnamelist, 'value', 1);
+	    drawnow;    
+	  end	  
+	  
+	end % for l
+	
+      end % for i
       
-      tst=0;
-      lines=textread([dname filesep txtinputs{i}],'%s');
-      for l=1:length(lines)
+    else
+      
+      for i=1:length(fnames)
 	
-	line=lines{l};
+	tst=0;
 	
-	try 
+	line=[dname fnames{i}];
+	
+	try
 	  tst=load_untouch_header_only(line);
-	catch, 
+	catch
 	  fprintf('file %s could not be opened\n',line);
 	end
 	
 	if(isstruct(tst))
-	  fnames=[fnames;{line}];
+	  fnamelist=get(h.fv, 'string');
+	  fnamelist{end+1}=line;
+	  set(h.fv, 'string', fnamelist, 'value', 1);
+	  drawnow;    
 	end
 	
-      end % for l
+      end % for i
       
-    end % for i
+    end
     
-  else
+    set(h.dv, 'string', dname);
     
-    for i=1:length(fnames)
-      
-      tst=0;
-      
-      lines=[dname fnames{i}];
-      
-      try 
-	tst=load_untouch_header_only(lines);
-      catch 
-	fprintf('file %s could not be opened\n',lines);
-      end
-      
-      if(isstruct(tst))      
-	fnames{i}=lines;
-      end
-      
-    end % for i
-    
-  end
-  
-  set(h.dv, 'string', dname);
-  set(h.fv, 'string', [get(h.fv, 'string');fnames(:)]);
-  set(h.fv, 'value', 1);
-  drawnow;
-  
-  
 end
- 
+
 return
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -301,10 +303,10 @@ return
 %
 
 function savfiles(callingObject, event, h);
-
+  
   [fname, dname] = uiputfile({'*.txt', 'txt files'}, ...
-                    'file to save to', ...
-                    [get(h.dv,'string') filesep 'fegui.txt']);
+			     'file to save to', ...
+			     [get(h.dv,'string') filesep 'fegui.txt']);
   
   if (fname)
     
@@ -317,67 +319,66 @@ function savfiles(callingObject, event, h);
       fprintf(fid, '%s\n', s{i});
     end
     fclose (fid);
-  
+    
   end
   
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % clear the selection of files
 %
 
 function clrfiles(h);
-
-set(h.dv, 'string', pwd);
-set(h.fv, 'string', '','value', 0);
+  
+  set(h.fv, 'string', '','value', 0);
   
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % change max iterations slider value after changing the edit box
 %
 
 function upd_slider(callingObject, event, h);
-
-if( prod(size(str2num(get(h.ie, 'string')))) == 1 )
   
-  iv=max(1, min(100, str2num(get(h.ie, 'string'))));
-  set(h.ie, 'string', num2str(iv));
-  set(h.iv, 'value', iv);
+  if( prod(size(str2num(get(h.ie, 'string')))) == 1 )
+    
+    iv=max(1, min(100, str2num(get(h.ie, 'string'))));
+    set(h.ie, 'string', num2str(iv));
+    set(h.iv, 'value', iv);
+    
+  else
+    
+    upd_edit(h.iv, 0, h)
+    
+  end
   
-else
-  
-  upd_edit(h.iv, 0, h)
-  
-end
-
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % change max iterations edit box value after changing the slider
 %
 
 function upd_edit(callingObject, event, h);
-
-set(h.iv, 'value', round(get(h.iv, 'value')));
-ie=get(h.iv, 'value');
-set(h.ie, 'string', num2str(ie));
-
+  
+  set(h.iv, 'value', round(get(h.iv, 'value')));
+  ie=get(h.iv, 'value');
+  set(h.ie, 'string', num2str(ie));
+  
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % save the output log
 %
 
 function sav(callingObject, event, h);
-
+  
   [fname, dname] = uiputfile({'*.txt;*.log', 'txt / log files'}, ...
-                    'file to save to', ...
-                    [get(h.dv,'string') filesep 'fastECM.log']);
+			     'file to save to', ...
+			     [get(h.dv,'string') filesep 'fastECM.log']);
   if (fname)
     
     fid = fopen([dname filesep fname], 'w');
@@ -393,13 +394,14 @@ function sav(callingObject, event, h);
   end
   
 return
-
+  
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % clear the output log
 %
 
 function clr(h);
- set(h.ov, 'string', 'output log', ...
-	  'value', 1);
+  set(h.ov, 'string', 'output log', ...
+	    'value', 1);
 return
+  

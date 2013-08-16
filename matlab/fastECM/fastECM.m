@@ -41,11 +41,23 @@ function fastECM( inputfile, rankmap, normmap, maxiter )
 % use a local file if no input filename is supplied
 
 if (~nargin)                  
+  % If called w/o agruments,
+  % use demo file fmri4d.nii.gz in fastECM's own directory
   inputfile=[fileparts(which('fastECM')) filesep 'fmri4d.nii.gz'];
+  if (exist(inputfile)~=2)
+      inputfile=inputfile(1:(end-3));
+      if (exist(inputfile)~=2)
+        fprintf('warning: demo file %s[.gz] not found, exiting\n',inputfile);
+        return;
+      end   
+  end
+  fprintf('demo call:\n>> fastECM(''%s'',%d,%d,%d)\n',inputfile,1,1,20);
+  fastECM(inputfile,1,1,20);
+  return;
 end
 
 if (nargin<4)
-  maxiter=100;
+  maxiter=99;
 end
 
 % check if nifti support exists, otherwise add supplied version
