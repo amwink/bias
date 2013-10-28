@@ -22,7 +22,7 @@
   2. install a good c++ compiler ( here: a version of gcc that supports c++11                                 )
      -> in debian: sudo apt-get install gcc-snapshot
   3. call the c++ compiler with the right options and libraries                
-     -> in debian: /usr/lib/gcc-snapshot/bin/g++ -std=c++11 -I/usr/include/nifti -o fastecm fastecm.cpp /usr/lib/libniftiio.so
+     -> in debian: /usr/lib/gcc-snapshot/bin/g++ -Ofast -std=c++11 -I/usr/include/nifti -o fastecm fastecm.cpp /usr/lib/libniftiio.so
 
   If you use this method/program in your research, please remember to cite this paper
    in the journal "Brain Connectivity":
@@ -137,7 +137,7 @@ int main ( int   argc,
   /* and the size of 1 volume                                                  */
   unsigned 
     volsize = inputimage->dim[1] * inputimage->dim[2] * inputimage->dim[3];
-  vector < unsigned long > 
+  vector < size_t > 
     mask ( volsize );
 
   /* initialise the 4d data structure, with each timepoint data empty, size 0  */
@@ -153,41 +153,37 @@ int main ( int   argc,
   unsigned 
     masksize = 0;
 
-  for ( int t = 0; t < ( inputimage->dim[4] ); t++ )
-
+  /* build mask while reading data                                             */
+  /* mask is the minimum of each voxel's time series, binarised                */
+  for ( int t = 0; t < int ( data.size() ); t++ )    
     if ( nifti_image_load_bricks ( inputimage, 1, &t, &inputbrick ) ) {
-
       cout << " reading brick " << t << " of " << inputimage->dim[4] << " ... ";
-
       /* resize to whole volume (brick - including zeroes) and read the brick  */
       data[t].resize ( volsize );
       getNiftiBricks ( inputimage, inputbrick.bricks[0], data[t].size(), &data[t] );
-
-      /* if this is the first volume, use nunzeroes as the mask                */
-      if ( !t ) {
-	for ( unsigned i = 0; i < data[t].size(); i++ )
-	  if ( data[0][i] )
-	    mask[masksize++] = i;
-	mask.resize ( masksize );
-      }
-
-      /* mask the current volume                                               */
-      for ( unsigned i = 0; i < masksize; i++ )
-	data[t][i] = data[t][mask[i]];
-
-      /* resize to only include the in-mask voxels                             */
-      data[t].resize ( masksize );
-      
+      for ( size_t i = 0; i < data[t].size(); i++ )
+	if ( data[t][i] > 0 )
+	  mask[i]++; // increase each voxel's count if it is nonzero in this volume 
       cout << " done\r" << flush;
-
-    } else {
-      
-      /* if reading fails, issue error message and exit                        */
+    } else {      
       cout << "There is a problem with reading input image " << inputfilename << endl;
       nifti_image_free ( inputimage );
-      return 1;
+      return 1;      
+    } 
 
-    }
+  /* now only store indices of voxels that have data in all volumes            */  
+  for ( size_t i = 0; i < mask.size(); i++ )
+    if ( mask[i]==data.size() )
+      mask[masksize++]=i; // amazingly this is safe (masksize never overtakes i)
+  mask.resize(masksize);
+  
+  /* apply the mask to the data, storing in-mask voxels only                   */
+  for ( int t = 0; t < int ( data.size() ); t++ ) {     
+    for ( unsigned i = 0; i < masksize; i++ )
+      data[t][i] = data[t][mask[i]];    
+    /* resize to only include the in-mask voxels                             */
+    data[t].resize ( masksize );
+  }
 
   cout << endl;
 
@@ -198,6 +194,8 @@ int main ( int   argc,
   /* see http://stackoverflow.com/questions/14924912                           */
   cout << " computing mean image     ... ";
   
+  num 
+    matlab_eps = pow ( 2., -52. );
   vector < num > 
     colmean ( data[0].size(), 0. );
 
@@ -252,13 +250,14 @@ int main ( int   argc,
 
   /* finally, population var divides by n, sample var by                       */
   /* n-1 ->  to get sample var, multiply by n/(n-1)                            */
+  
   transform ( colvar.begin(), colvar.end(), 
 	      colvar.begin(),
-	      bind2nd ( multiplies < num > (), data.size() / ( data.size() - 1 ) ) 
+	      bind2nd ( multiplies < num > (), num(data.size())/num(data.size()-1) ) 
 	      );
-
+  
   cout << " done \n";
-
+  
   /* then standard deviation at every in-mask voxel                            */
   cout << " computing std dev image  ... ";
 
@@ -273,7 +272,7 @@ int main ( int   argc,
 
   /* add a tiny number to prevent divisions by 0                               */
   transform ( colstd.begin(), colstd.end(), colstd.begin(),
-	      bind2nd ( plus < num > (), numeric_limits < num > :: min() ) );
+	      bind2nd ( plus < num > (), matlab_eps ) );
 
   cout << " done \n";
   
@@ -290,7 +289,7 @@ int main ( int   argc,
 			   [] ( num d1, num d2 ) { return d1 - d2; } 
 			   ); }
 	     );
-
+ 
   for_each ( data.begin(), data.end(),
 	     [&] ( vector < num >& row ) { /* divide by std */
 	       transform ( row.begin(), row.end(), 
@@ -299,6 +298,11 @@ int main ( int   argc,
 			   [] ( num d1, num d2 ) { return d1 / d2; } 
 			   ); } 
 	     );
+  
+  // cout << "mean          = " << colmean[masksize-1] << " " << endl;
+  // cout << "var           = " << colvar[masksize-1] << " " << endl;
+  // cout << "mask(0)       = " << mask[0] <<endl;
+  // cout << "data(mask(0)) = "; for ( auto d: data ) cout << d[0] << " ";
   
   /* also divide data by sqrt ( data.size() -1 ) to have unit diagonals in M   */
   for_each ( data.begin(), data.end(),
@@ -325,8 +329,8 @@ int main ( int   argc,
     cnorm   = 0., 
     dnorm   = 1., 
     prevsum = 0.;
-  
-  while ( ( iter < 100 ) && ( dnorm > numeric_limits < num > :: min()  ) ) {
+ 
+  while ( ( iter < 100 ) && ( dnorm > cnorm ) ) {
     
     /* temporary vector vprev [1xN] = vcurr, prevsum is its sum                */
     vector < num > 
@@ -392,14 +396,24 @@ int main ( int   argc,
 				   vprev.begin(), 
 				   0. ) );
 
+
+    /* L2 norm of current estimate                                             */    
+    cnorm = matlab_eps * 
+            sqrt ( inner_product ( vcurr.begin(), vcurr.end(), 
+				   vcurr.begin(), 
+				   0. ) );
+    
     iter++;
   
     if (verbose)
       cout << 
-	"\n iteration " << setw(3) << iter << 
-	", cnorm = " << setw(11) << cnorm << 
-	", dnorm = " << setw(11) << dnorm;
- 
+	"\n iteration " << setw(2) << iter <<
+	", || v_i - v_(i-1) || / || v_i * epsilon || = " << 
+	fixed << setprecision(16) << setfill('0') << dnorm <<
+	" / " << 
+	fixed << setprecision(16) << setfill('0') << cnorm;
+
+
   } /* while ( ( iter < 100 ) && ( dnorm > numeric_limits< num >::min() ) )    */
   cout << "  done" << endl;
 
