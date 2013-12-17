@@ -1,4 +1,4 @@
-![alt](https://github.com/amwink/bias/bias_logo.png)
+![alt](https://github.com/amwink/bias/blob/master/bias_logo.png)
 
 bias
 ====
