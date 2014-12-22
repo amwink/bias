@@ -61,7 +61,7 @@ if (~nargin)
         
     end
     
-    fprintf(['\nsyntax:\nfastECM(\n\t<str  filename>,\n\t<bool rankmap>,  <bool normmap>, '...
+    fprintf(['\nsyntax:\nfastECM(\n\t<str  filename>,\n\t<bool rankmap>,  <bool normmap>, ' ...
         '<bool degmap>,\n\t<int  maxiter>,\n\t<str  maskname>, <str atlasname>\n\t\b)\n\n']);
     
     % demo call that uses all options
@@ -97,13 +97,13 @@ if (exist('load_untouch_nii')~=2)
     fprintf('Software for reading NifTI images not found.        \n');
     fprintf('Using Tools for Nifti/Analyze for NifTI file I / O. \n');
     fprintf('  www.mathworks.com/matlabcentral/fileexchange/8797 \n');
-    usenifti=1;                    % use included nifti libraries
+    usenifti=1;                       % use included nifti libraries
     npath=[fileparts(which('fastECM')) filesep 'tools4nifti'];
-    addpath(npath);                % (by adding them to the path)
+    addpath(npath);                   % (by adding them to the path)
     
 else
     
-    usenifti=0;                    % if not already on system
+    usenifti=0;                       % if not already on system
     
 end % if exist
 
@@ -111,24 +111,24 @@ end % if exist
 
 fprintf('reading %s ...\n',inputfile);
 
-if (inputfile(1)~=filesep)       % if path does not start with a separator
+if (inputfile(1)~=filesep)            % if path does not start with a separator
     
-    if (    (isunix) | ...         % and in windos not with a drive letter or '\\'
+    if (    (isunix) | ...            % and in windos not with a drive letter or '\\'
             ( (~isunix) & (inputfile(2)~='\') & (inputfile(2)~=':') ) ...
-            )                           % make it an absolute path
+            )                         % make it an absolute path
         inputfile=[pwd filesep inputfile];
     end % if isunix
     
 end % if inputfile
 
-M=load_untouch_nii(inputfile);           % read the information from the NifTI file
-m=M.img;                         % get the 4d voxel data
-M.img=[];                        % empty img after reading
-M=rmfield(M,'img');              % and remove from M
+M=load_untouch_nii(inputfile);        % read the information from the NifTI file
+m=M.img;                              % get the 4d voxel data
+M.img=[];                             % empty img after reading
+M=rmfield(M,'img');                   % and remove from M
 msz=size(m);
-tln=msz(4);                      % store the time series length
-msz=msz(1:3);                    % store the size of one image volume
-m(find(~isfinite(m)))=0;         % get rid of NaNs
+tln=msz(4);                           % store the time series length
+msz=msz(1:3);                         % store the size of one image volume
+m(find(~isfinite(m)))=0;              % get rid of NaNs
 
 % check whether a mask filename has been given and if dimensions are OK
 
@@ -136,21 +136,21 @@ msk=1;
 
 if ( maskfile ~=0 )
     
-    if (maskfile(1)~=filesep)      % if path does not start with a separator
+    if (maskfile(1)~=filesep)         % if path does not start with a separator
         
-        if (    (isunix) | ...       % and in windos not with a drive letter or '\\'
+        if (    (isunix) | ...        % and in windos not with a drive letter or '\\'
                 ( (~isunix) & (maskfile(2)~='\') & (maskfile(2)~=':') ) ...
-                )                    % make it an absolute path
+                )                     % make it an absolute path
             maskfile=[pwd filesep maskfile];
         end % if isunix
         
     end % if maskfile
     
-    Msk=load_untouch_nii(maskfile);        % read the information from the NifTI file
-    msk=double(Msk.img);           % get the 3d voxel data
-    Msk.img=[];                    % empty img after reading
+    Msk=load_untouch_nii(maskfile);   % read the information from the NifTI file
+    msk=double(Msk.img);              % get the 3d voxel data
+    Msk.img=[];                       % empty img after reading
     
-    if (size(msk) ~= msz)          % test if mask is the right size
+    if (size(msk) ~= msz)             % test if mask is the right size
         
         warning (sprintf(['dimensions of %s incompatible with %s\n' ...
             'continuing with nonzeroes of first volume'], ...
@@ -164,8 +164,8 @@ end % if maskfile
 
 % if not then make mask based on the positions of nonzeros in the 1st volume
 
-msk=msk.*squeeze(min(m,[],4));   % take the minimum of each timeseries
-msk=(msk>0);                     % make mask binary
+msk=msk.*squeeze(abs(min(m,[],4)));   % take the minimum of each timeseries
+msk=(msk>0);                          % make mask binary
 
 % if atlas is used, generate regional time series
 
@@ -173,21 +173,21 @@ atl=1;
 
 if ( atlasfile ~=0 )
     
-    if (atlasfile(1)~=filesep)     % if path does not start with a separator
+    if (atlasfile(1)~=filesep)        % if path does not start with a separator
         
-        if (    (isunix) | ...       % and in windos not with a drive letter or '\\'
+        if (    (isunix) | ...        % and in windos not with a drive letter or '\\'
                 ( (~isunix) & (atlasfile(2)~='\') & (atlasfile(2)~=':') ) ...
-                )                    % make it an absolute path
+                )                     % make it an absolute path
             atlasfile=[pwd filesep atlasfile];
         end % if isunix
         
     end % if atlasfile
     
-    Atl=load_untouch_nii(atlasfile);       % read the information from the NifTI file
-    atl=msk.*double(Atl.img);      % get the 3d voxel data of atlas regions inside the mask
-    Atl.img=[];                    % empty img after reading
+    Atl=load_untouch_nii(atlasfile);  % read the information from the NifTI file
+    atl=double(Atl.img);              % get the 3d voxel data of atlas regions
+    Atl.img=[];                       % empty img after reading
     
-    if (size(atl) ~= msz)          % test if mask is the right size
+    if (size(atl) ~= msz)             % test if mask is the right size
         
         warning (sprintf(['dimensions of %s incompatible with %s\n' ...
             'continuing by using all voxel time series'], ...
@@ -197,72 +197,73 @@ if ( atlasfile ~=0 )
         
     else
         
-        msk=(atl>0);
+        msk=msk.*(atl>0);
         
     end % if size
     
 end % if atlasfile
 
 % make time series 2D [tln msk]
-
-m=reshape(m,[prod(msz) tln])';   % reshape the 4d voxels as 2d: [tln msz]
-m=double(m(:,find(msk)));        % continue with only the nonzero voxels
+m=reshape(m,[prod(msz) tln])';        % reshape the 4d voxels as 2d: [tln msz]
+m=double(m(:,find(msk)));             % continue with only the nonzero voxels
 
 % if atlasfile found -> make regional time series
 if ( ~atlasfile )
     
-    np=size(m,2);                  % store the number of nonzero voxels
+    np=size(m,2);                     % store the number of nonzero voxels
     
 else
     
-    mreg=max(atl(:));              % highest region label
-    atl=atl(find(msk));            % atl now the same size as msk
-    reg=unique(atl);               % region labels: nonzero values found inside mask/atl
-    rsiz=length(reg);              % number of region labels found
+    mreg=max(atl(:));                 % highest region label
+    atl=atl(find(msk));               % atl now the same size as msk
+    reg=unique(atl);                  % region labels: nonzero values found inside mask/atl
     
-    mm=zeros(tln,rsiz);
-    for r=1:rsiz                   % construct regional means
-        mm(:,r) = mean( m(:,find(reg==reg(r))),2 );
+    mm=zeros(tln,length(reg));
+    for r=reg(:)'                     % construct regional means
+        tmp=m(:,find(atl==r));
+        mm(:,r) = mean(tmp,2);
     end
-    m=mm;                          % continue with regional mean time series
+    m=mm;                             % continue with regional mean time series
     clear mm;
     
-    np=r;                          % store the number of included regiosnfac
+    save tseries2.mat m
+    
+    np=size(m,2);                     % store the number of included regions
     
 end % if ~atlasfile
 
 % compute mean and var
 
-mav=mean(m);                     % compute the time series mean
+mav=mean(m);                          % compute the time series mean
 % mvr=var(m);
-mvr=std(m);                      % compute the time series variance
-mvr=mvr+eps;                     % prevent divisions by 0
+mvr=std(m);                           % compute the time series variance
+mvr=mvr+eps;                          % prevent divisions by 0
 
 % prepare matrix
 
 m=(m-(ones(tln,1)*mav))./(ones(tln,1)*mvr);
 % mean 0, std 1 to make  covariance matrix
-m=m/sqrt(tln-1);                 % make correlations instead (diagonal 1)
+m=m/sqrt(tln-1);                      % make correlations instead (diagonal 1)
 
 % initialise eigenvector estimate v
 
-vprev=0;                         % 'initialise' previous ECM estimate
-vcurr=ones(np,1)/sqrt(np);       % initialise estimate with L2-norm == 1
+vprev=0;                              % 'initialise' previous ECM estimate
+vcurr=ones(np,1)/sqrt(np);            % initialise estimate with L2-norm == 1
 
-iter=0;                          % reset iteration counter
-dnorm=1;                         % initial value for difference L2-norm
-cnorm=0;                         % initial value for estimate L2-norm
+iter=0;                               % reset iteration counter
+dnorm=1;                              % initial value for difference L2-norm
+cnorm=0;                              % initial value for estimate L2-norm
 
 % efficient power iteration
 
 while ((iter<maxiter) & (dnorm>cnorm))
     
-    vprev=vcurr;                   % start with previous estimate
-    prevsum=sum(vprev);            % sum of estimate
-    vcurr_1=m*vprev;               % part one of M*v
-    vcurr_2=m'*vcurr_1;            % part two of M*v
-    vcurr_3=vcurr_2+prevsum;       % adding sum -- same effect as [M+1]*v
-    vcurr=vcurr_3/norm(vcurr_3,2); % normalise L2-norm
+    vprev=vcurr;                      % start with previous estimate
+    prevsum=sum(vprev);               % sum of estimate
+    vcurr_1=m*vprev;                  % part one of M*v
+    vcurr_2=m'*vcurr_1;               % part two of M*v
+    vcurr_3=vcurr_2+prevsum;          % adding sum -- same effect as [M+1]*v
+    vcurr=vcurr_3/norm(vcurr_3,2);    % normalise L2-norm
     
     if (~iter)
         
@@ -273,11 +274,11 @@ while ((iter<maxiter) & (dnorm>cnorm))
         
     end % if iter
     
-    iter=iter+1;                   % increase iteration counter
-    dnorm=norm(vcurr-vprev,2);     % L2-norm of difference prev-curr estimate
-    cnorm=norm(vcurr,2)*eps;       % L2-norm of current estimate
+    iter=iter+1;                      % increase iteration counter
+    dnorm=norm(vcurr-vprev,2);        % L2-norm of difference prev-curr estimate
+    cnorm=norm(vcurr,2)*eps;          % L2-norm of current estimate
     fprintf('iteration %02d, || v_i - v_(i-1) || / || v_i * epsilon || = %0.16f / %0.16f\n', ...
-        iter,dnorm,cnorm)          % some stats for the users
+        iter,dnorm,cnorm)             % some stats for the users
     
 end % while
 
@@ -289,7 +290,7 @@ write_map(inputfile, M, msk, atl, vcurr, 'fastECM', sprintf('ECM [iterations: %d
 
 if ( ( (nargin>1) & (rankmap ~= 0) ) | ( (nargin>2) & (normmap~=0) ) )
     
-    rvcurr=tiedrank(vcurr);        % tied ranks: equal values lead to equal ranks
+    rvcurr=tiedrank(vcurr);           % tied ranks: equal values lead to equal ranks
     rvcurr=(rvcurr)/(length(rvcurr)+1);
     % go from uniform [1,N] to uniform ]0,1[
     if (rankmap ~= 0)
@@ -300,8 +301,8 @@ if ( ( (nargin>1) & (rankmap ~= 0) ) | ( (nargin>2) & (normmap~=0) ) )
     
     if ( (nargin>2) & (normmap ~= 0) )
         
-        mu=0;                        % mean
-        sig=1;                       % std dev
+        mu=0;                         % mean
+        sig=1;                        % std dev
         
         nvcurr=mu+sqrt(2)*sig*erfinv(2*rvcurr-1);
         % uniform ]0,1[ to N(0,1) via
@@ -316,8 +317,8 @@ end % if nargin1
 
 if (prod(size(atl)) ~= 1)
     
-    regs=1:mreg;
-    regs(end+1,reg)=vcurr;
+    regs=(1:mreg);
+    regs(end+1,regs)=vcurr';
     
     if(exist('dvcurr'))
         regs(end+1,reg)=dvcurr;
@@ -332,21 +333,21 @@ if (prod(size(atl)) ~= 1)
     end % if
     
     [fd,fn,fx2]=fileparts(inputfile);
-    [fd1,fn,fx]=fileparts(fn);     % base file name and 1st extension (2nd may be .gz)
-    fx=[fx fx2];                   % in which case, concatenate by adding fx2
+    [fd1,fn,fx]=fileparts(fn);        % base file name and 1st extension (2nd may be .gz)
+    fx=[fx fx2];                      % in which case, concatenate by adding fx2
     txtfile=[fd filesep fn '_fastECM.txt'];
     delete(txtfile);
     dlmwrite(txtfile,regs,'precision',4,'delimiter','\t')
     txtfile=[fd filesep fn '_reg_avg.txt'];
     delete(txtfile);
-    dlmwrite(txtfile,[reg';m],'precision',4,'delimiter','\t')
+    dlmwrite(txtfile,[regs;m],'precision',4,'delimiter','\t')
     
 end % if prod
 
 % if nifti support was added before, remove it again to not leave prints
 
 if (usenifti)
-    rmpath(npath);                 % was own nifti added to path -- if yes then remove now
+    rmpath(npath);                    % was own nifti added to path -- if yes then remove now
 end % if
 
 return % fastECM
@@ -375,11 +376,11 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
 if (prod(size(atl)) ~= 1)
     
     vcurr_2=zeros(size(atl));
-    reg=unique(atl);               % region labels: nonzero values found inside atl
+    reg=unique(atl);                  % region labels: nonzero values found inside atl
     
     for r=1:length(reg)
         nvox=find(atl==reg(r));
-        vcurr_2(nvox)=vcurr(r)/(length(nvox));
+        vcurr_2(nvox)=vcurr(r);
     end % for
     
     vcurr=vcurr_2;
@@ -389,26 +390,26 @@ end % if prod
 
 % create output array mout
 
-mout=zeros(size(msk));           % initialise output with 0 (background)
-mout(find(msk))=vcurr;           % fill the nonzero voxels with map values
+mout=zeros(size(msk));                % initialise output with 0 (background)
+mout(find(msk))=vcurr;                % fill the nonzero voxels with map values
 qnts=quantiles(vcurr(vcurr>0),[.01 .99]);    % quantiles to set contrast
 
 % write output nifti file based on mout
 
 [fd,fn,fx2]=fileparts(inputfile);
-[fd1,fn,fx]=fileparts(fn);       % base file name and 1st extension (2nd may be .gz)
-fx=[fx fx2];                     % in which case, concatenate by adding fx2
+[fd1,fn,fx]=fileparts(fn);            % base file name and 1st extension (2nd may be .gz)
+fx=[fx fx2];                          % in which case, concatenate by adding fx2
 outputfile=[fd filesep fn '_' mapfile fx];
 fprintf('writing %s ...\n',outputfile);
 M.hdr.hist.descrip=sprintf('generated by fastECM - %s',descrip);
 % leave our name tag in the nifti record
-M.hdr.dime.dim(5)=1;             % map is 3D not 4D
-M.hdr.dime.pixdim(5)=0;          % so are its voxels
-M.hdr.dime.cal_min=qnts(1);      % min of range (for win/lev)
-M.hdr.dime.cal_max=qnts(2);      % max
-M.hdr.dime.glmin=qnts(1);        % min of range
-M.hdr.dime.glmax=qnts(2);        % max
-M.img=mout;                      % add voxel data to map
-save_untouch_nii(M,outputfile);          % write the file
+M.hdr.dime.dim(5)=1;                  % map is 3D not 4D
+M.hdr.dime.pixdim(5)=0;               % so are its voxels
+M.hdr.dime.cal_min=qnts(1);           % min of range (for win/lev)
+M.hdr.dime.cal_max=qnts(2);           % max
+M.hdr.dime.glmin=qnts(1);             % min of range
+M.hdr.dime.glmax=qnts(2);             % max
+M.img=mout;                           % add voxel data to map
+save_untouch_nii(M,outputfile);       % write the file
 
 return

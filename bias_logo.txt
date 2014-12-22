@@ -1,0 +1,13 @@
+made from http://en.wikipedia.org/wiki/File:Human-brain.SVG as follows:
+- used inkscape to create BW eps
+- used  pstoimg to create BW png
+- in GIMP
+  * added new layer with background colour (white) below original
+  * create gradient 'skyline' from left to right in new layer
+  * mode 'multiply' on original layer 
+  * flatten image
+  * using 'fuzzy select', threshold 128, all boxes unchecked, cut outside brain
+  * using 'text tool', arial, 300 dpi, type 'bias'
+  * mode 'saturation' on text layer
+  * add alpha channel
+  * using 'select by colour', threshold 0, cut white outside brain
