@@ -34,10 +34,20 @@ STU=${3} # XLS file describing study group
 printf "looking if xls2csv can be found                ... "
 if [[ `which xls2csv 2> /dev/null` == "" ]]; then
     if [[ ! -f ${PWD}/bin/xls2csv ]]; then
-
 	# build catdoc / xls2csv
-	git config --global http.sslverify false
-	git clone http://www.wagner.pp.ru/git/oss/catdoc.git; 
+	if [[ `which git` != "" ]]; then
+	    git config --global http.sslverify false
+	    git clone http://www.wagner.pp.ru/git/oss/catdoc.git;
+	else
+	    if [[ `which unzip` != "" ]]; then 
+		wget -N http://www.cbv.ns.ca/owl/DOCS/tools/catdoc-0.94.2-win32.zip
+		unzip -o catdoc-0.94.2-win32.zip 
+	    else
+		wget -N http://www.cbv.ns.ca/owl/DOCS/tools/catdoc-0.94.2.tar.gz
+		tar zxvf catdoc-0.94.2.tar.gz
+	    fi   
+	    mv catdoc-0.94.2 catdoc
+	fi
 	cd catdoc; 
 	./configure --prefix=${PWD%/*}; 
 	make; 
