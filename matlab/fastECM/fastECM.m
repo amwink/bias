@@ -41,7 +41,7 @@ function fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasf
 %
 %         For using some, but not all options, the easiest way to
 %         call fastECM is to pass these options in a struct:
-%               >> op.filename='fmri4d.nii.gz';
+%               >> op.inputfile='fmri4d.nii.gz';
 %               >> op.dynamics=25;
 %               >> fastECM(op);
 %
@@ -134,7 +134,7 @@ end                     % if dynamics
 if ( isstruct(inputfile) ) 
   
   input_parameters=inputfile;
-  fieldnames={ 'inputfile' 'rankmap' 'normmap' 'degmap' 'maxiter' 'maskfile' 'atlasfile' 'wholemat' 'dynamics' };
+  fieldnames={ 'rankmap' 'normmap' 'degmap' 'maxiter' 'maskfile' 'atlasfile' 'wholemat' 'dynamics' 'inputfile' };
   
   for f=1:length(fieldnames)
   
@@ -431,7 +431,7 @@ for d=1:dynamics
   
   if ( ( (nargin>1) & (rankmap ~= 0) ) | ( (nargin>2) & (normmap~=0) ) )    
     
-    rvcurr(:,d) =  tiedrank(vcurr)      % tied ranks: equal values lead to equal ranks
+    rvcurr(:,d) =  tiedrank(vcurr) ...  % tied ranks: equal values lead to equal ranks
                   / (length(vcurr)+1);  % division: from uniform [1,N] to uniform ]0,1[
 						   
     if ( (nargin>2) & (normmap ~= 0) )
@@ -440,8 +440,8 @@ for d=1:dynamics
       sig=1;                            % standard deviation for N(0,1) distribution
      
       % produce a map of gaussianised EC ranks if requested and write to normECM       
-      nvcurr(:,d) = mu +sqrt(2) * sig   % probit function (en.wikipedia.org/wiki/Probit)
-                    * erfinv            % based on inverse error function 
+      nvcurr(:,d) = mu+sqrt(2)*sig ...  % probit function (en.wikipedia.org/wiki/Probit)
+                    * erfinv ...        % based on inverse error function 
 		    (2*rvcurr(:,d)-1);  % uniform ]0,1[ to N(0,1) via inverse transform sampling
     
     end %if (nargin2)
