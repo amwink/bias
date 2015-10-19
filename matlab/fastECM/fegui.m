@@ -2,6 +2,8 @@ function fegui;
 %
 % graphical user interface to the fastECM program
 %
+%
+%
 % (c) Alle Meije Wink -- 16/03/2012
 %     a.m.winkATgmail.com
 %
@@ -9,9 +11,16 @@ function fegui;
 % in the journal "Brain Connectivity":
 %
 % Alle Meije Wink, Jan C de Munck, Ysbrand D van der Werf, Odile A van den heuvel, Frederik Barkhof
-% "Fast eigenvector centrality mapping of voxel-wise connectivity in functional MRI: implementation, validation and interpretation."
-% URL: http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0087
+%         "Fast eigenvector centrality mapping of voxel-wise connectivity in functional MRI:
+%          implementation, validation and interpretation."
+%         Brain Connectivity 2012, Vol. 2 No. 5, pages 265-274
+% URL:    http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0087
+% or:     http://dare.ubvu.vu.nl/handle/1871/48750
 %
+%
+%
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -290,6 +299,8 @@ set(h.ov, 'buttondownfcn', @(s, e)clr(h));
 
 return;
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % execute fastECM on the selected files with selected options
@@ -357,6 +368,8 @@ if ~strcmp(fnames, '')
 end % if strcmp
 
 return
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -445,6 +458,8 @@ end %if dname
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % save the selection of files
@@ -474,6 +489,8 @@ if (fname)
 end % if fname
 
 return
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -511,6 +528,8 @@ end % if dname
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % select atlas
@@ -547,6 +566,8 @@ end % if dname
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % change max iterations slider value after changing the edit box
@@ -568,6 +589,8 @@ end % if
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % change max iterations edit box value after changing the slider
@@ -580,6 +603,8 @@ ie = get(h.iv, 'value');
 set(h.ie, 'string', num2str(ie));
 
 return
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -610,6 +635,8 @@ end % if fname
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % clear the selection of files
@@ -621,6 +648,8 @@ set(h.fv, 'string', '', 'value', 0);
 clr(h); % also clear log
 
 return
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
@@ -634,6 +663,8 @@ set(  h.ov, 'string', '<empty>', ...
 
 return
 
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
 % clear the selected mask file
@@ -645,6 +676,8 @@ set(h.mv, 'string', ' no mask', 'value', 0);
 set(h.md, 'string', '' );
 
 return
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %
