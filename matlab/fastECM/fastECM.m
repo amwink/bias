@@ -1,4 +1,4 @@
-function fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasfile, wholemat, dynamics )
+function err=fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasfile, wholemat, dynamics )
 %
 % function fastECM ( string <inputfile>,
 %                    bool <rankmap>, bool <normmap>, bool <degmap>,
@@ -23,7 +23,8 @@ function fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasf
 %
 % returns a file fastECM.nii in the same directory as <inputfile>
 %         which contains a 'fast eigenvector centrality mapping'
-%         whole-brain voxelwise functional connectivity analysis
+%         whole-brain voxelwise functional connectivity analysis;
+%         error code 0 if all is well, 1 otherwise
 %
 %
 %
@@ -70,36 +71,41 @@ function fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasf
 % If called w/o agruments, produce a demo call
 if (~nargin)       
   
-    inputfile = [fileparts(which('fastECM')) filesep 'fmri4d.nii.gz'              ];
-    maskfile  = [fileparts(which('fastECM')) filesep 'mask_csf.nii.gz'            ];
-    atlasfile = [fileparts(which('fastECM')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
+  inputfile = [fileparts(which('fastECM')) filesep 'fmri4d.nii.gz'              ];
+  maskfile  = [fileparts(which('fastECM')) filesep 'mask_csf.nii.gz'            ];
+  atlasfile = [fileparts(which('fastECM')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
+  
+  if ((exist(inputfile)*exist(maskfile)*exist(atlasfile))~=8)
     
-    if ((exist(inputfile)*exist(maskfile)*exist(atlasfile))~=8)
-        
-        inputfile = inputfile(1:(end-3));
-        maskfile  = maskfile(1:(end-3));
-        atlasfile = atlasfile(1:(end-3));
-        if (exist(inputfile)~=2)
-            fprintf('warning: not all demo files found, exiting\n');
-            return;
-        end % if ~input files (uncompressed)
-        
-    end % if ~inputfile or ~maskfile or ~atlasfiles
+    inputfile = inputfile(1:(end-3));
+    maskfile  = maskfile(1:(end-3));
+    atlasfile = atlasfile(1:(end-3));
+    if (exist(inputfile)~=2)
+      fprintf('warning: not all demo files found, exiting\n');
+      err=1;
+      return;
+    end % if ~input files (uncompressed)
     
-    fprintf(['\nsyntax:\nfastECM(\n\t<str  filename>,\n\t<bool rankmap>,  <bool normmap>, ' ...
-             '<bool degmap>,\n\t<int  maxiter>,\n\t<str  maskname>, <str atlasname>\n\t'    ...
-	     '<bool wholemat>\n\t<int dynamics>\n\t\b)\n\n']);
-    
-    fprintf('inputfile = ''%s'';\n',inputfile);
-    fprintf('maskfile  = ''%s'';\n',maskfile);
-    fprintf('atlasfile = ''%s'';\n',atlasfile);
-    
-    democall='fastECM( inputfile, 1, 1, 1, 20, maskfile, atlasfile, 0, 25 );'
-    fprintf('\n%% demo call:\n>> %s\n\n',democall);
-    eval(democall);
-    fprintf('\n');    
-
-    return; % call fastECM inside this call
+  end % if ~inputfile or ~maskfile or ~atlasfiles
+  
+  fprintf(['\nsyntax:\nfastECM(\n\t<str  filename>,\n\t<bool rankmap>,  <bool normmap>, ' ...
+	   '<bool degmap>,\n\t<int  maxiter>,\n\t<str  maskname>, <str atlasname>\n\t'    ...
+	   '<bool wholemat>\n\t<int dynamics>\n\t\b)\n\n']);
+  
+  fprintf('inputfile = ''%s'';\n',inputfile);
+  fprintf('maskfile  = ''%s'';\n',maskfile);
+  fprintf('atlasfile = ''%s'';\n',atlasfile);
+  
+  democall='fastECM( inputfile, 1, 1, 1, 20, maskfile, atlasfile, 0, 25 );'
+  fprintf('\n%% demo call:\n>> %s\n\n',democall);
+  err=eval(democall);
+  fprintf('\n');    
+  
+  return; % call fastECM inside this call
+  
+else
+  
+  err = 0;                              % continue without errors  
     
 end % if ~nargin
 
@@ -143,7 +149,12 @@ if ( isstruct(inputfile) )
     end
     
   end
-  input_parameters
+  
+  if isstruct(inputfile)
+    fprintf('error: ''inputfile'' not defined in struct, exiting\n');
+    err=1;
+    return;
+  end % if isstruct
   
 end % if isstruct
 
@@ -480,12 +491,16 @@ end % if nvcurr
 % XML-file (take care that native XML may take a long time to load even for small files)
 if (exist('connmat_out')==1)
   
-  write_map(inputfile, M, ones(size(connmat_out)), 1,   connmat_out, 'connections', 'connectivity matrix');
-  write_map(inputfile, M, ones(size(vcurr_bin)),   1,   vcurr_bin,   'backbone',    'binary backbone');
-  write_map(inputfile, M, msk,                     atl, communities, 'communities', 'community_louvain');
-  write_map(inputfile, M, msk,                     atl, betweenness, 'betweenness', 'betweenness');
-  write_map(inputfile, M, msk,                     atl, clustering,  'clustering',  'clustering');
-  write_map(inputfile, M, msk,                     atl, pathlength,  'path_length', 'pathlength');
+  % put matrices also in [vector_per volume £volumes] format
+  connmat_out=reshape(connmat_out,[prod(size(clus)) dynamics]); 
+  vcurr_bin=reshape(vcurr_bin,[prod(size(clus)) dynamics]);  
+  
+  write_map(inputfile, M, ones(size(clus)), 1,   connmat_out, 'connections', 'connectivity matrix');
+  write_map(inputfile, M, ones(size(clus)), 1,   vcurr_bin,   'backbone',    'binary backbone');
+  write_map(inputfile, M, msk,              atl, communities, 'communities', 'community_louvain');
+  write_map(inputfile, M, msk,              atl, betweenness, 'betweenness', 'betweenness');
+  write_map(inputfile, M, msk,              atl, clustering,  'clustering',  'clustering');
+  write_map(inputfile, M, msk,              atl, pathlength,  'path_length', 'pathlength');
 
   % also make a readable file
   fid=fopen([fileparts(inputfile) filesep 'fastECMstats.xml'],'w');
@@ -610,37 +625,17 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
   end % if prod
 
   % create output array mout (and initialise 0)
-  % possibilities:
-  % (1) mout is a single map, same size as volume M
-  % (2) mout is a single map, different size to volume (conn_mat)
-  % (3) mout is a series of dynamic maps, volume size is M
-  Msize=M.hdr.dime.dim(2:4);
-  if ( prod(size(msk)) ~= prod(Msize) ) % case 2
-    
-    mout=zeros(size(msk));
-    
-  else
-    
-    mout=zeros([Msize size(vcurr,2)]);  % case 3
-    
-  end
+  mout=zeros([size(msk) size(vcurr,2)]);
   mout=nan*mout;                        % NaN outside mask
   
   qnts = quantiles(vcurr ...
 		   (vcurr>0), ...
 		   [.01 .99]);          % quantiles to set contrast
   
-  smout=size(mout);
-  mout=reshape(mout,[prod(smout(1:end-1)) smout(end)]);
-  if (prod(size(msk))~=prod(size(vcurr)))
-    
-    mout(find(msk),:)=vcurr;            % fill nonzero voxels
-    
-  else
-    
-    mout(find(msk))=vcurr;              % fill nonzero voxels
-    
-  end
+  % put vcurr in mout
+  smout=size(mout)
+  mout=reshape(mout,[prod(size(msk)) size(vcurr,2)]);
+  mout(find(msk),:)=vcurr;
   mout=reshape(mout,smout);
   
   % write output nifti file based on mout
