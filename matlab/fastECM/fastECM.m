@@ -491,7 +491,7 @@ end % if nvcurr
 % XML-file (take care that native XML may take a long time to load even for small files)
 if (exist('connmat_out')==1)
   
-  % put matrices also in [vector_per volume £volumes] format
+  % put matrices also in [vector_per volume Â£volumes] format
   connmat_out=reshape(connmat_out,[prod(size(clus)) dynamics]); 
   vcurr_bin=reshape(vcurr_bin,[prod(size(clus)) dynamics]);  
   
@@ -633,7 +633,7 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
 		   [.01 .99]);          % quantiles to set contrast
   
   % put vcurr in mout
-  smout=size(mout)
+  smout=size(mout);
   mout=reshape(mout,[prod(size(msk)) size(vcurr,2)]);
   mout(find(msk),:)=vcurr;
   mout=reshape(mout,smout);
