@@ -312,50 +312,39 @@ fnames = get(h.fv, 'string');
 
 if ~strcmp(fnames, '')
     
-    dorank  = get(h.rv, 'value');
-    donorm  = get(h.nv, 'value');
-    dopowr  = get(h.pv, 'value');
-    maxiter = get(h.iv, 'value');
-    dowhol  = get(h.wv, 'value');
-    maxdyn  = get(h.de, 'string');
+    opts.maxiter  = get(h.iv, 'value');
+    opts.dynamics = str2num(get(h.de, 'string'));
+    opts.rankmap  = get(h.rv, 'value');
+    opts.normmap  = get(h.nv, 'value');
+    opts.degmap   = get(h.pv, 'value');
+    opts.wholemat = get(h.wv, 'value');
+
+    if(get(h.mv, 'value'))      
+      opts.maskfile  = [get(h.md, 'string') strtrim(get(h.mv, 'string'))];      
+    end % if
+    
+    if(get(h.av, 'value'))
+      opts.atlasfile = [get(h.ad, 'string') strtrim(get(h.av, 'string'))];
+    end % if
     
     set(h.ov, 'string', '');
     set(h.ov, 'value', 1);
-    
+         
     drawnow;
     
     for i = 1:length(fnames)
         
         set(h.gb, 'string', 'see log on ''Settings'' tab', 'enable', 'off')
-        cmd = sprintf('fastECM(''%s'', %d, %d, %d, %d)', ...
-            fnames{i}, dorank, donorm, dopowr, maxiter );
-        
-        if(get(h.mv, 'value'))
-            
-            mname = [get(h.md, 'string') strtrim(get(h.mv, 'string'))];
-            cmd = strrep(cmd, ')', [ ', ''' mname ''' )']);
-            
-        end % if
-        
-        if(get(h.av, 'value'))
-            
-            if (~get(h.mv, 'value'))
-                cmd = strrep(cmd, ')', [ ', '''' )']);
-            end % if
-            
-            aname = [get(h.ad, 'string') strtrim(get(h.av, 'string'))];
-            cmd = strrep(cmd, ')', [ ', ''' aname ''' )']);
-            
-        end % if
-        
-	cmd = strrep (cmd, ')', [', ' num2str(dowhol) ', ' num2str(maxdyn) ')']); 
+ 	
+	opts.inputfile=fnames{i};
 	
-        set(h.ov, 'string', [get(h.ov, 'string');{['running ' cmd ' ...']}]);
+	cmd=textscan(evalc('opts'),'%s');	
+        set(h.ov, 'string', [get(h.ov, 'string');{['running with [ ' ...
+		   sprintf('%s ',cmd{:}{:}) ' ]']}]);
         set(h.ov, 'listboxtop', length(get(h.ov, 'string')))
         
         drawnow;
-        
-        cmdlog = evalc(cmd);
+        cmdlog = evalc('fastECM(opts);');
         cmdlog = strread(cmdlog, '%s', 'delimiter', '\n');
         set(h.ov, 'string', [get(h.ov, 'string');cmdlog]);
         

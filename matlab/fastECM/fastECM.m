@@ -116,6 +116,9 @@ end % if ~nargin
 %                       atlas region selection,
 %                       mask selection
 %                       max. iterations
+%                       write degree (node power) map
+%                       write normally distributed map
+%                       write ranks (uniformly distributed) map
 % and set defaults
 if (nargin<9)
   dynamics=1;
@@ -127,6 +130,15 @@ if (nargin<9)
 	maskfile=0;
 	if (nargin<5)
 	  maxiter=25;
+	  if (nargin<4)
+	    degmap=0;
+	    if (nargin<3)
+	      normmap=0;
+	      if (nargin<2)
+		rankmap=0;
+	      end       % if rankmap
+	    end         % if normmap
+	  end	        % if degmap
 	end             % if maxiter
       end               % if maskfile
     end                 % if atlasfile
@@ -427,10 +439,10 @@ for d=1:dynamics
     end % if wholemat    
     vcurr=vcurr_3/norm(vcurr_3,2);      % normalise L2-norm
 
-    if ( (~iter) & (nargin>3) & (degmap ~= 0) )
+    if ( (~iter) & (degmap ~= 0) )
       
       dvcurr(:,d)=vcurr_2(:);           % save 'node power' of this dynamic if requested
-    end % if nargin
+    end % if degmap
               
     iter=iter+1;                        % increase iteration counter
     dnorm=norm(vcurr-vprev,2);          % L2-norm of difference prev-curr estimate
@@ -440,12 +452,12 @@ for d=1:dynamics
     
   end % while
   
-  if ( ( (nargin>1) & (rankmap ~= 0) ) | ( (nargin>2) & (normmap~=0) ) )    
+  if ( (rankmap ~= 0) | (normmap~=0) )    
     
     rvcurr(:,d) =  tiedrank(vcurr) ...  % tied ranks: equal values lead to equal ranks
                   / (length(vcurr)+1);  % division: from uniform [1,N] to uniform ]0,1[
 						   
-    if ( (nargin>2) & (normmap ~= 0) )
+    if ( normmap ~= 0) 
 
       mu=0;                             % mean for N(0,1) distributed centralities
       sig=1;                            % standard deviation for N(0,1) distribution
@@ -455,9 +467,9 @@ for d=1:dynamics
                     * erfinv ...        % based on inverse error function 
 		    (2*rvcurr(:,d)-1);  % uniform ]0,1[ to N(0,1) via inverse transform sampling
     
-    end %if (nargin2)
+    end %if (normmap)
     
-  end % if(nargin1)
+  end % if(rankmap)
   
   vcurr_out(:,d)=vcurr;
   fprintf('\n');
@@ -474,7 +486,7 @@ if ( exist('dvcurr')==1 )
   write_map(inputfile, M, msk, atl, dvcurr, 'degCM', 'weighted degree centrality (node power)');
 
 end % if dvcurr
-if ( exist('rvcurr')==1 ) 
+if ( (exist('rvcurr')==1) & rankmap ) 
 
   write_map(inputfile, M, msk, atl, rvcurr, 'rankECM', 'ECM [converted to ]0,1[ ranks]');
 
@@ -514,7 +526,7 @@ if (exist('connmat_out')==1)
       writetosheet(fid,dvcurr,'degCM');
       
     end
-    if ( exist('rvcurr')==1 ) 
+    if ( (exist('rvcurr')==1) & rankmap ) 
       
       writetosheet(fid,rvcurr,'rankECM');
       
