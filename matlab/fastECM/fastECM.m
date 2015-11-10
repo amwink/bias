@@ -71,9 +71,9 @@ function err=fastECM( inputfile, rankmap, normmap, degmap, maxiter, maskfile, at
 % If called w/o agruments, produce a demo call
 if (~nargin)       
   
-  inputfile = [fileparts(which('fastECM')) filesep 'fmri4d.nii.gz'              ];
-  maskfile  = [fileparts(which('fastECM')) filesep 'mask_csf.nii.gz'            ];
-  atlasfile = [fileparts(which('fastECM')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
+  inputfile = [fileparts(which('fastECM.m')) filesep 'fmri4d.nii.gz'              ];
+  maskfile  = [fileparts(which('fastECM.m')) filesep 'mask_csf.nii.gz'            ];
+  atlasfile = [fileparts(which('fastECM.m')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
   
   if ((exist(inputfile)*exist(maskfile)*exist(atlasfile))~=8)
     
@@ -180,7 +180,7 @@ if (exist('load_untouch_nii')~=2)
     fprintf('Using Tools for Nifti/Analyze for NifTI file I / O. \n');
     fprintf('  www.mathworks.com/matlabcentral/fileexchange/8797 \n');
     usenifti=1;                    
-    npath=[fileparts(which('fastECM')) filesep 'tools4nifti'];
+    npath=[fileparts(which('fastECM.m')) filesep 'tools4nifti'];
     addpath(npath);                   
     
 else    
@@ -395,7 +395,7 @@ for d=1:dynamics
 	indi=triu(reshape(1:(lv*lv),[lv lv]),1);
 	if (exist('backbone_wu')~=2);	% get 'backbone' i.e. MST + some extra
 
-	  eval(['!wget -P ' fileparts(which('fastECM')) ' sites.google.com/site/bctnet/Home/functions/backbone_wu.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/backbone_wu.m ']); 	    
 	
 	end	
 	[mst clus]=backbone_wu(vcurr_1,fix(sqrt(lv)));	
@@ -404,7 +404,7 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: communities (index per node)
 	if (exist('community_louvain')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM')) ' sites.google.com/site/bctnet/Home/functions/community_louvain.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/community_louvain.m ']); 	    
 	
 	end
 	communities(:,d)=community_louvain(vcurr_bin(:,:,d));
@@ -412,7 +412,7 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: betweenness (per node)
 	if (exist('betweenness_bin')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM')) ' sites.google.com/site/bctnet/Home/functions/betweenness_bin.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/betweenness_bin.m ']); 	    
 	
 	end
 	betweenness(:,d)=betweenness_bin(vcurr_bin(:,:,d));
@@ -420,7 +420,7 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: clustering (per node)
 	if (exist('clustering_coef_bu')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM')) ' sites.google.com/site/bctnet/Home/functions/clustering_coef_bu.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/clustering_coef_bu.m ']); 	    
 	
 	end
 	clustering(:,d)=clustering_coef_bu(vcurr_bin(:,:,d));
@@ -428,7 +428,7 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: path length (per node)
 	if (exist('distance_bin')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM')) ' sites.google.com/site/bctnet/Home/functions/distance_bin.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/distance_bin.m ']); 	    
 	
 	end
 	pathlengthtmp=distance_bin(vcurr_bin(:,:,d));

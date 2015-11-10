@@ -297,6 +297,17 @@ set(h.av, 'buttondownfcn', @(s, e)clratlas(h), 'value', 0);
 set(h.fv, 'buttondownfcn', @(s, e)clrfiles(h));
 set(h.ov, 'buttondownfcn', @(s, e)clr(h));
 
+% check if nifti support exists otherwise add fegui-supplied version
+if (exist('load_untouch_nii')~=2)
+    
+    fprintf('Software for reading NifTI images not found.        \n');
+    fprintf('Using Tools for Nifti/Analyze for NifTI file I / O. \n');
+    fprintf('  www.mathworks.com/matlabcentral/fileexchange/8797 \n');
+    npath=[fileparts(which('fegui.m')) filesep 'tools4nifti'];
+    addpath(npath);                   
+
+end % if exist
+
 return;
 
 
