@@ -395,7 +395,9 @@ for d=1:dynamics
 	indi=triu(reshape(1:(lv*lv),[lv lv]),1);
 	if (exist('backbone_wu')~=2);	% get 'backbone' i.e. MST + some extra
 
-	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/backbone_wu.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ...
+                ' -O backbone_wu.m ' ...
+                'sites.google.com/site/bctnet/Home/functions/backbone_wu.m ']); 	    
 	
 	end	
 	[mst clus]=backbone_wu(vcurr_1,fix(sqrt(lv)));	
@@ -404,7 +406,9 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: communities (index per node)
 	if (exist('community_louvain')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/community_louvain.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ...
+                 ' -O community_louvain.m ' ...               
+                'sites.google.com/site/bctnet/Home/functions/community_louvain.m ']); 	    
 	
 	end
 	communities(:,d)=community_louvain(vcurr_bin(:,:,d));
@@ -412,7 +416,9 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: betweenness (per node)
 	if (exist('betweenness_bin')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/betweenness_bin.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ...
+                ' -O betweenness_bin.m ' ...
+                'sites.google.com/site/bctnet/Home/functions/betweenness_bin.m ']); 	    
 	
 	end
 	betweenness(:,d)=betweenness_bin(vcurr_bin(:,:,d));
@@ -420,7 +426,9 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: clustering (per node)
 	if (exist('clustering_coef_bu')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/clustering_coef_bu.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ...
+                  ' -O clustering_coef_bu.m ' ...
+              ' sites.google.com/site/bctnet/Home/functions/clustering_coef_bu.m ']); 	    
 	
 	end
 	clustering(:,d)=clustering_coef_bu(vcurr_bin(:,:,d));
@@ -428,13 +436,15 @@ for d=1:dynamics
 	% apply bct measures to vcurr_bin: path length (per node)
 	if (exist('distance_bin')~=2);
 
-	  eval(['!wget -P ' fileparts(which('fastECM.m')) ' sites.google.com/site/bctnet/Home/functions/distance_bin.m ']); 	    
+	  eval(['!wget -P ' fileparts(which('fastECM.m')) ...
+                  ' -O distance_bin.m ' ...
+                ' sites.google.com/site/bctnet/Home/functions/distance_bin.m ']); 	    
 	
 	end
 	pathlengthtmp=distance_bin(vcurr_bin(:,:,d));
 	pathlength(:,d)=mean(pathlengthtmp);
 	
-      end % if iter
+      end % if ~iter
             
     end % if wholemat    
     vcurr=vcurr_3/norm(vcurr_3,2);      % normalise L2-norm
