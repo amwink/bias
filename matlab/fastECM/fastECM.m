@@ -205,6 +205,10 @@ if (inputfile(1)~=filesep)              % if path does not start with a separato
     
 end % if inputfile
 
+% get the directory, base name and extension(s)
+[fd,fn,fx2]=fileparts(inputfile);       % dir and base file name + extension (may be combined)
+[fd1,fn,fx]=fileparts(fn);              % base file name and 1st extension (2nd may be .gz)
+
 % get the data and clear data from file record
 M=load_untouch_nii(inputfile);          % read the information from the NifTI file
 m=M.img;                                % get the 4d voxel data
@@ -321,7 +325,11 @@ else
     m=mm;                               % continue with regional mean time series
     clear mm;
     
-    save fastECM_tseries.mat m
+    txtfile=[fd filesep fn '_fastECMtseries.txt'];
+    dlmwrite(txtfile,m,' ');            % write regional mean time series to text file
+    
+    matfile=[fd filesep fn '_fastECMtseries.mat'];    
+    save (matfile,'m');
     
     np=r;                               % store the number of included regios
 
@@ -525,7 +533,8 @@ if (exist('connmat_out')==1)
   write_map(inputfile, M, msk,              atl, pathlength,  'path_length', 'pathlength');
 
   % also make a readable file
-  fid=fopen([fileparts(inputfile) filesep 'fastECMstats.xml'],'w');
+  xmlfile=[fd filesep fn '_fastECMstats.xml'];
+  fid=fopen(xmlfile,'w');
   if (fid>(-1))  
     
     fprintf(fid,'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n');
