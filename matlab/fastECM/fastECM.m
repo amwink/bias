@@ -658,17 +658,17 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
   % create output array mout (and initialise 0)
   mout=zeros([size(msk) size(vcurr,2)]);
   mout=nan*mout;                        % NaN outside mask
-  
+   
   qnts = quantiles(vcurr ...
 		   (vcurr>0), ...
 		   [.01 .99]);          % quantiles to set contrast
-  
+
   % put vcurr in mout
   smout=size(mout);
   mout=reshape(mout,[prod(size(msk)) size(vcurr,2)]);
   mout(find(msk),:)=vcurr;
   mout=reshape(mout,smout);
-  
+   
   % write output nifti file based on mout
   [fd,fn,fx2]=fileparts(inputfile);
   [fd1,fn,fx]=fileparts(fn);            % base file name and 1st extension (2nd may be .gz)
@@ -686,7 +686,9 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
   M.hdr.dime.cal_max=qnts(2);           % max
   M.hdr.dime.glmin=qnts(1);             % min of range
   M.hdr.dime.glmax=qnts(2);             % max
-  M.img=mout;                           % add voxel data to map
+  M.hdr.dime.scl_slope=1;               % the quantiles only make sense
+  M.hdr.dime.scl_inter=0;               % with slope 1 and intercept 0
+  M.img=mout;                           % add voxel data to map  
   save_untouch_nii(M,outputfile);       % write the file
-  
+    
 return
