@@ -679,6 +679,9 @@ function write_map(inputfile, M, msk, atl, vcurr, mapfile, descrip)
   M.hdr.dime.dim=[length(size(mout)) size(mout)];     
   M.hdr.dime.dim((end+1):8)=1;          % map is not 4D 
   M.hdr.dime.pixdim((end+1):8)=1;       % neither are its voxels
+  if ~max([32,64]==M.hdr.dime.bitpix)   % if data type not at least float
+    M.hdr.dime.datatype=64;             % make it double
+  end;                           
   M.hdr.dime.cal_min=qnts(1);           % min of range (for win/lev)
   M.hdr.dime.cal_max=qnts(2);           % max
   M.hdr.dime.glmin=qnts(1);             % min of range
