@@ -295,7 +295,7 @@ else
     
 end % if atlasfile
 
-fprintf('loaded and masked\n');
+fprintf('\nloaded and masked\n');
 
 
 
@@ -408,7 +408,13 @@ for d=1:dynamics
                 'sites.google.com/site/bctnet/Home/functions/backbone_wu.m ']); 	    
 	
 	end	
-	[mst clus]=backbone_wu(vcurr_1,fix(sqrt(lv)));	
+	no0corr=vcurr_1;                % make correlation matrix where 0-pairs have very low, non-zero correlation
+	no0corr(~no0corr)=min(no0corr(:))-eps;       % otherwise the BCT script will not add these nodes to the MST
+	no0corr=no0corr+1;
+	no0corr(find(diag(diag(no0corr))))=0;
+	
+	% compute MST and add nodes up to degree sqrt(#nodes) to the 'backbone'
+	[mst clus]=backbone_wu(no0corr,fix(sqrt(lv)));	
 	vcurr_bin(:,:,d)=sign(clus);
 	
 	% apply bct measures to vcurr_bin: communities (index per node)
@@ -465,7 +471,7 @@ for d=1:dynamics
     iter=iter+1;                        % increase iteration counter
     dnorm=norm(vcurr-vprev,2);          % L2-norm of difference prev-curr estimate
     cnorm=norm(vcurr,2)*eps;            % L2-norm of current estimate
-    fprintf('dynamic %03d (%03d - %03d), iteration %02d, || v_i - v_(i-1) || / || v_i * epsilon || = %0.16f / %0.16f\r', ...
+    fprintf('dynamic %04d (%04d - %04d), iteration %03d, || v_i - v_(i-1) || / || v_i * epsilon || = %0.16f / %0.16f\r', ...
 	    d,d-1,ddiff+d-1,iter,dnorm,cnorm)          
     
   end % while
@@ -521,7 +527,7 @@ end % if nvcurr
 % XML-file (take care that native XML may take a long time to load even for small files)
 if (exist('connmat_out')==1)
   
-  % put matrices also in [vector_per volume £volumes] format
+  % put matrices also in [vector_per_volume #volumes] format
   connmat_out=reshape(connmat_out,[prod(size(clus)) dynamics]); 
   vcurr_bin=reshape(vcurr_bin,[prod(size(clus)) dynamics]);  
   
