@@ -416,6 +416,7 @@ for d=1:dynamics
 	% compute MST and add nodes up to degree sqrt(#nodes) to the 'backbone'
 	[mst clus]=backbone_wu(no0corr,fix(sqrt(lv)));	
 	vcurr_bin(:,:,d)=sign(clus);
+	vcurr_mst(:,:,d)=sign(mst);
 	
 	% apply bct measures to vcurr_bin: communities (index per node)
 	if (exist('community_louvain')~=2);
@@ -530,9 +531,11 @@ if (exist('connmat_out')==1)
   % put matrices also in [vector_per_volume #volumes] format
   connmat_out=reshape(connmat_out,[prod(size(clus)) dynamics]); 
   vcurr_bin=reshape(vcurr_bin,[prod(size(clus)) dynamics]);  
+  vcurr_mst=reshape(vcurr_mst,[prod(size(clus)) dynamics]);  
   
   write_map(inputfile, M, ones(size(clus)), 1,   connmat_out, 'connections', 'connectivity matrix');
   write_map(inputfile, M, ones(size(clus)), 1,   vcurr_bin,   'backbone',    'binary backbone');
+  write_map(inputfile, M, ones(size(clus)), 1,   vcurr_mst,   'min_span',    'minimal spanning tree');
   write_map(inputfile, M, msk,              atl, communities, 'communities', 'community_louvain');
   write_map(inputfile, M, msk,              atl, betweenness, 'betweenness', 'betweenness');
   write_map(inputfile, M, msk,              atl, clustering,  'clustering',  'clustering');
