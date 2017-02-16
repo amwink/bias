@@ -83,6 +83,8 @@ def fastECM(inputfile = '',
         matl=np.asarray(img_atl.dataobj)        # get voxel data
         msk=msk*(matl>0).astype(float)          # mask within available atlas data
         matl=matl*(msk>0).astype(float)         # only sample atlas within mask
+    else:   
+        matl=0
 
     # apply the final mask and count the number of voxels 
     msk = msk.reshape(np.prod(msz))             # reshape msk as a 1D vector
@@ -95,8 +97,13 @@ def fastECM(inputfile = '',
     if atlasfile:
         mreg=matl.max()                         # max. atlas label
         matl=matl.reshape(np.prod(msz))         # same shape as mask
-        
-        matl=matl.reshape(msz) 
+        matl=matl[np.nonzero(msk)]              # only search in mask
+        regs=np.unique(matl)                    # find the used region values
+        rgts=np.zeros((tln,len(regs)))          # regional time series
+        for t in range(0,len(regs)):
+            rgts[:,t]=np.mean(m[:,np.where(matl==t)], axis=1)
+        m=rgts                                  # now m contains regional mean time series
+        npt=len(regs)
     
     # Initialize eigenvector estimate    
     vprev = 0                                   # initialize previous ECM estimate
@@ -128,7 +135,7 @@ def fastECM(inputfile = '',
         print "fast ECM error: power iteration algorithm did not converge"
     
     # write the ECM
-    write_map(inputfile,img,vcurr,msk)
+    write_map(inputfile,img,vcurr,msk,matl)
     
     # return 0 if no error   
     return err  
@@ -161,6 +168,14 @@ def write_map (inputfile='',
         URL:    http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0087  
         or:     http://dare.ubvu.vu.nl/handle/1871/48750
     """
+
+    if matl:
+        vcurr_2=matl                            # allocate in-brain voxels
+        regs=np.unique(matl)                    # find the used region values
+        for t in range(0,len(regs)):
+            vcurr_2[np.where(matl==t)] = vcurr[t]
+        vcurr=vcurr_2                           # now m contains regional mean time series
+    
     outputfile=os.path.abspath(inputfile).replace(".nii","_fastECM.nii")
     msz=msk.shape                                # size of the volume
     msk=np.reshape(msk,np.prod(msz))             # 1D vector of the same size
