@@ -15,7 +15,6 @@
 import os
 import numpy as np
 import nibabel as nib
-from numpy import linalg as LA
 
 def fastECM(inputfile = '',
             maskfile  = '',
@@ -28,7 +27,10 @@ def fastECM(inputfile = '',
             maxiter   = 42,
             wholemat  = 0):
     """
-    fast_eigenvector_centrality(inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasfile, wholemat, dynamics, verbose)
+    module fastECM:
+
+    import fastECM
+    fastECM.fastECM(inputfile, rankmap, normmap, degmap, maxiter, maskfile, atlasfile, wholemat, dynamics, verbose)
         - inputfile is the name of a 4D 
           fMRI image time series in the NifTI format
         - maskfile selects voxels inside a mask
@@ -71,16 +73,30 @@ def fastECM(inputfile = '',
         
     # if a maskfile was supplied, use this as a mask as well
     if maskfile:
-        img_mask=nib.load(maskfile)
-        mmsk=np.asarray(img_mask.dataobj)  
-        msk=msk*(mmsk>0).astype(float)
+        img_mask=nib.load(maskfile)             # open nifti file
+        mmsk=np.asarray(img_mask.dataobj)       # get voxel data
+        msk=msk*(mmsk>0).astype(float)          # mask within available data
+
+    # if an atlasfile was supplied, sample with (atlas & mask) and correlate labels
+    if atlasfile:
+        img_atl=nib.load(atlasfile)             # open nifti file
+        matl=np.asarray(img_atl.dataobj)        # get voxel data
+        msk=msk*(matl>0).astype(float)          # mask within available atlas data
+        matl=matl*(msk>0).astype(float)         # only sample atlas within mask
 
     # apply the final mask and count the number of voxels 
-    msk = msk.reshape(np.prod(msz))             # reshape as a 1D vector
-    m = m.reshape(np.prod(msz),tln).transpose() # reshape as a sequence of vectors
+    msk = msk.reshape(np.prod(msz))             # reshape msk as a 1D vector
+    m = m.reshape(np.prod(msz),tln).transpose() # reshape m as a sequence of vectors
     m = m[:,np.nonzero(msk)].squeeze()          # remove singleton dimensions
     msk = msk.reshape(msz)
     npt = m.shape[1]                            # count the number of voxels in the mask
+
+    # when an atlas is used, signals are grouped within atlas regions
+    if atlasfile:
+        mreg=matl.max()                         # max. atlas label
+        matl=matl.reshape(np.prod(msz))         # same shape as mask
+        
+        matl=matl.reshape(msz) 
     
     # Initialize eigenvector estimate    
     vprev = 0                                   # initialize previous ECM estimate
@@ -98,11 +114,11 @@ def fastECM(inputfile = '',
         vcurr_1 = m.dot(vprev)                  # part one of M*v
         vcurr_2 = m.T.dot(vcurr_1)              # part two of M*v
         vcurr_3 = vcurr_2 + prevsum             # adding sum -- same effect as [M+1]*v
-        vcurr   = vcurr_3/LA.norm(vcurr_3,2)    # normalize L2-norm
+        vcurr   = vcurr_3/np.linalg.norm(vcurr_3,2)    # normalize L2-norm
           
-        i += 1                                  # next iteration
-        dnorm = LA.norm(vcurr-vprev, 2)         # L2 norm of difference with previous result
-        cnorm = LA.norm(vcurr,2)*np.spacing(1)  # L2 norm of current result
+        i += 1                                         # next iteration
+        dnorm = np.linalg.norm(vcurr-vprev, 2)         # L2 norm of difference with previous result
+        cnorm = np.linalg.norm(vcurr,2)*np.spacing(1)  # L2 norm of current result
         
         if verbose:
             print "iteration %02d, || v_i - v_(i-1) || / || v_i * epsilon || = %0.16f / %0.16f" % (i, dnorm, cnorm) #  some stats for the users
@@ -148,7 +164,7 @@ def write_map (inputfile='',
     outputfile=os.path.abspath(inputfile).replace(".nii","_fastECM.nii")
     msz=msk.shape                                # size of the volume
     msk=np.reshape(msk,np.prod(msz))             # 1D vector of the same size
-    vout=msk                                     # output: zero outside mask                     
+    vout=msk.astype('float32')                   # output: zero outside mask                     
     vout[np.nonzero(msk)]=vcurr                  # put vcurr inside mask
     vout=np.reshape(vout,msz).astype('float32')  # resize to volume 
     print vout.dtype
