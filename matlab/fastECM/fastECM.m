@@ -587,13 +587,33 @@ end % if usenifti
 
 return % fastECM
 
-
+% tiedrank - Tied rank of each element in a set
+%   [r]=tiedrank(X,dim)
+%   Computes tied rank of each element of X along given dimension 
+%   (default is to use the first non-singleton dimension) 
+%   "Tied ranking" is such that ex-aequo elements share the same (possibly half) rank:  
+%       >> tiedrank(['DABBC']) %-> 6 1 2.5 2.5 4
+% from https://github.com/kndiaye/matlab/blob/master/tiedrank.m
+function [r]=tiedrank(X,dim)
+   if nargin<2
+     dim=min(find(size(X)>1));
+     if isempty(dim)
+       error('X is empty!')
+     end
+   end
+   [ignore,Y]=sort(X,dim);
+   [ignore,r1]=sort(Y,dim);
+   [ignore,Y]=sort(-X,dim);
+   [ignore,r2]=sort(Y,dim);
+   r2=size(X,dim)-r2+1;
+   r=(r1+r2)/2;
+return
 
 % function to write a variable as an XML sheet
 % the option of writing flattened upper triangular matrices is implemented but never used!
 function writetosheet(fid,variable,sheetname);
 
-   fprintf(fid,'<ss:Worksheet ss:Name="%s">\n<ss:Table>\n',sheetname);
+fprintf(fid,'<ss:Worksheet ss:Name="%s">\n<ss:Table>\n',sheetname);
    if (length(size(variable))==3)
    
      for m=1:size(variable,3)           % write matrix by flattening upper triangular matrix
@@ -610,7 +630,7 @@ function writetosheet(fid,variable,sheetname);
      fprintf(fid,'<ss:Row>\n');
      for r=1:size(variable,1)
        
-       fprintf(fid,'<ss:Cell><ss:Data ss:Type="Number">%0.4f</ss:Data></ss:Cell>',variable(r,c));
+       fprintf(fid,'<ss:Cell><ss:Data ss:Type="Number">%0.8f</ss:Data></ss:Cell>',variable(r,c));
        
      end
      fprintf(fid,'</ss:Row>\n');
