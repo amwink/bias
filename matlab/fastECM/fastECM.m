@@ -211,7 +211,7 @@ end % if inputfile
 
 % get the data and clear data from file record
 M=load_untouch_nii(inputfile);          % read the information from the NifTI file
-m=M.img;                                % get the 4d voxel data
+m=double(M.img);                        % get the 4d voxel data
 M.img=[];                               % empty img after reading
 M=rmfield(M,'img');                     % and remove from M
 msz=size(m);
