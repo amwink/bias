@@ -15,6 +15,7 @@
 import os
 import numpy as np
 import nibabel as nib
+import matplotlib.pyplot as plt
 
 def fastECM(inputfile = '',
             maskfile  = '',
@@ -95,15 +96,18 @@ def fastECM(inputfile = '',
 
     # when an atlas is used, signals are grouped within atlas regions
     if atlasfile:
-        mreg=matl.max()                         # max. atlas label
-        matl=matl.reshape(np.prod(msz))         # same shape as mask
-        matl=matl[np.nonzero(msk)]              # only search in mask
-        regs=np.unique(matl)                    # find the used region values
+        msk = msk.reshape(np.prod(msz))         # reshape msk as a 1D vector
+        matl=matl.reshape(np.prod(msz))         # same 1D shape as mask above
+        matl=matl[np.nonzero(msk)].squeeze()    # sample matl in mask (same size as m)
+        regs=np.unique(matl[np.where(matl>0)])  # find the used region values
         rgts=np.zeros((tln,len(regs)))          # regional time series
-        for t in range(0,len(regs)):
-            rgts[:,t]=np.mean(m[:,np.where(matl==t)], axis=1)
+        for t in range(len(regs)):            
+            #print regs[t]
+            rgts[:,t]=np.mean(m[:,np.where(matl==regs[t])], axis=2).squeeze()
         m=rgts                                  # now m contains regional mean time series
+        np.savetxt(os.path.abspath(inputfile).replace(".nii.gz","_fastECM.txt"),m,fmt="%d")
         npt=len(regs)
+        msk  = msk.reshape(msz)
     
     # Initialize eigenvector estimate    
     vprev = 0                                   # initialize previous ECM estimate
@@ -112,9 +116,8 @@ def fastECM(inputfile = '',
     i = 0                                       # reset iteration counter
     dnorm = 1                                   # initial value for difference L2-norm
     cnorm = 0                                   # initial value to estimate L2-norm
-    
+
     # Efficient power iteration
-    
     while (i < maxiter) & (dnorm > cnorm):
         vprev   = vcurr                         # start with previous estimate
         prevsum = vprev.sum()                   # sum of estimate
@@ -133,7 +136,9 @@ def fastECM(inputfile = '',
     if (i >= maxiter) & (dnorm > cnorm):        # test if we have converged (or reached max_iter)
         err = 128
         print "fast ECM error: power iteration algorithm did not converge"
-    
+
+    print vcurr
+        
     # write the ECM
     write_map(inputfile,img,vcurr,msk,matl)
     
@@ -168,12 +173,13 @@ def write_map (inputfile='',
         URL:    http://online.liebertpub.com/doi/abs/10.1089/brain.2012.0087  
         or:     http://dare.ubvu.vu.nl/handle/1871/48750
     """
-
-    if matl:
-        vcurr_2=matl                            # allocate in-brain voxels
-        regs=np.unique(matl)                    # find the used region values
+    
+    if np.prod(atl):
+        vcurr_2=np.zeros(atl.shape)             # allocate in-brain voxels
+        regs=np.unique(atl)                     # find the used region values
         for t in range(0,len(regs)):
-            vcurr_2[np.where(matl==t)] = vcurr[t]
+            all_t=np.where(atl==t)
+            vcurr_2[all_t] = vcurr[t]#/len(all_t)
         vcurr=vcurr_2                           # now m contains regional mean time series
     
     outputfile=os.path.abspath(inputfile).replace(".nii","_fastECM.nii")
