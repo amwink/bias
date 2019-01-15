@@ -576,9 +576,9 @@ end % if nvcurr
 if (exist ('connmat_out') == 1) 
   
   % put matrices also in [vector_per_volume #volumes] format
-  connmat_out = reshape (connmat_out, [prod (size (clus) ) dynamics]); 
-  vcurr_bin = reshape (vcurr_bin, [prod (size (clus) ) dynamics]); 
-  vcurr_mst = reshape (vcurr_mst, [prod (size (clus) ) dynamics]); 
+  connmat_out = reshape(connmat_out, [prod(size(clus)) dynamics]); 
+  vcurr_bin = reshape(vcurr_bin, [prod(size(clus)) dynamics]); 
+  vcurr_mst = reshape(vcurr_mst, [prod(size(clus)) dynamics]); 
   
   write_map (inputfile, M, ones (size (clus) ), 1, connmat_out, 'connections', 'connectivity matrix');
   write_map (inputfile, M, ones (size (clus) ), 1, vcurr_bin, 'backbone',  'binary backbone');
