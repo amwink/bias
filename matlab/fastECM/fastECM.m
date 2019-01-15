@@ -75,9 +75,9 @@ function err = fastECM ( inputfile, rankmap, normmap, degmap, maxiter, maskfile,
 % If called w/o agruments, produce a demo call
 if (~nargin)  
   
-  inputfile = [fileparts (which ('fastECM.m') ) filesep 'fmri4d.nii.gz'    ];
-  maskfile  = [fileparts (which ('fastECM.m') ) filesep 'mask_csf.nii.gz'   ];
-  atlasfile = [fileparts (which ('fastECM.m') ) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
+  inputfile = [fileparts(which('fastECM.m')) filesep 'fmri4d.nii.gz'    ];
+  maskfile  = [fileparts(which('fastECM.m')) filesep 'mask_csf.nii.gz'   ];
+  atlasfile = [fileparts(which('fastECM.m')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
   
   if ( (exist (inputfile) *exist (maskfile) *exist (atlasfile) ) ~= 8) 
     
