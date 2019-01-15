@@ -78,6 +78,21 @@ if (~nargin)
   inputfile = [fileparts(which('fastECM.m')) filesep 'fmri4d.nii.gz'    ];
   maskfile  = [fileparts(which('fastECM.m')) filesep 'mask_csf.nii.gz'   ];
   atlasfile = [fileparts(which('fastECM.m')) filesep 'aal_MNI_V4_4mm_gong.nii.gz' ];
+    
+  fprintf (2, ...
+	   ['\n   syntax:\n   fastECM (\n   \t<str  inputfile>, \n   \t<bool rankmap>,   <bool normmap>, ' ...
+	    '<bool degmap>, \n   \t<int  maxiter>, \n   \t<str  maskfile>,  <str atlasfile>,' ...
+	    '\n   \t<bool wholemat>,\n   \t<int  dynamics>,\n   \t<str  correlate>\n   \t\b) \n\n']);
+  
+  correlate = 'fast';
+  
+  fprintf ('   inputfile = ''%s'';\n', inputfile);
+  fprintf ('   maskfile  = ''%s'';\n', maskfile);
+  fprintf ('   atlasfile = ''%s'';\n', atlasfile);
+  fprintf ('   correlate = ''%s'';\n', correlate);
+  
+  democall = ['fastECM ( inputfile, 1, 1, 1, 20, maskfile, atlasfile, 0, 25, correlate );'];
+  fprintf ('\n   %% demo call:\n   >> %s\n\n', democall);
   
   if ( (exist (inputfile) *exist (maskfile) *exist (atlasfile) ) ~= 8) 
     
@@ -88,27 +103,14 @@ if (~nargin)
     if (exist (inputfile) ~= 2) 
       
       fprintf ('warning: not all demo files found, exiting\n');
-
+      
       err = 1;
       return;
       
     end % if ~input files (uncompressed) 
     
   end % if ~inputfile or ~maskfile or ~atlasfiles
-  
-  fprintf (['\nsyntax:\nfastECM (\n\t<str filename>, \n\t<bool rankmap>, <bool normmap>, ' ...
-	    '<bool degmap>, \n\t<int maxiter>, \n\t<str maskname>, <str atlasname>\n\t' ...
-	    '<bool wholemat>\n\t<int dynamics>\n\t<str correlate>\n\t\b) \n\n']);
-  
-  correlate = 'fast';
-  
-  fprintf ('inputfile = ''%s'';\n', inputfile);
-  fprintf ('maskfile = ''%s'';\n', maskfile);
-  fprintf ('atlasfile = ''%s'';\n', atlasfile);
-  fprintf ('correlate = ''%s'';\n', correlate);
-  
-  democall = ['fastECM ( inputfile, 1, 1, 1, 20, maskfile, atlasfile, 0, 25, correlate );'];
-  fprintf ('\n%% demo call:\n>> %s\n\n', democall);
+    
   err = eval (democall);
   fprintf ('\n'); 
   
@@ -190,9 +192,9 @@ end % if isstruct
 % otherwise add fastECM-supplied version
 if (exist ('load_untouch_nii') ~= 2) 
   
-  fprintf ('Software for reading NifTI images not found.  \n');
-  fprintf ('Using Tools for Nifti/Analyze for NifTI file I / O. \n');
-  fprintf (' www.mathworks.com/matlabcentral/fileexchange/8797 \n');
+  fprintf (2,'Software for reading NifTI images not found.  \n');
+  fprintf (2,'Using Tools for Nifti/Analyze for NifTI file I / O. \n');
+  fprintf (2,'www.mathworks.com/matlabcentral/fileexchange/8797\n\n');
   usenifti = 1;     
   npath = [fileparts(which('fastECM.m')) filesep 'tools4nifti'];
   addpath (npath);     
@@ -517,7 +519,7 @@ for d = 1:dynamics
     iter = iter+1;                      % increase iteration counter
     dnorm = norm (vcurr-vprev, 2);      % L2-norm of difference prev-curr estimate
     cnorm = norm (vcurr, 2) *eps;       % L2-norm of current estimate
-    fprintf ('dynamic %04d (%04d - %04d), iteration %03d, || v_i - v_ (i-1) || / || v_i * epsilon || = %0.16f / %0.16f\r', ...
+    fprintf ('dynamic %04d (%04d - %04d), iteration %04d, || v_i - v_ (i-1) || / || v_i * epsilon || = %0.16f / %0.16f\r', ...
 	     d, d-1, ddiff+d-1, iter, dnorm, cnorm)   
     
   end % while
