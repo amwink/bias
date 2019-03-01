@@ -5,8 +5,8 @@
 # The should have as argument the input file.
 #
 # Dit script maakt eerst een warp van standard space brain naar patient brain. Die matrix 
-# toepassen op Hugo's (Heronica's?) 152 cut brain. Daarna de minimum Z berekenen van dit 
-# brein en de nieuwe Z space. Daarna met fslroi het brein snijden dat het laagste puntje 
+# toepassen op Hugo's / Veronica's 152 cut brain. Daarna de minimum Z berekenen van dit 
+# brein en de nieuwe Z space. Daarna met fslroi het brein snijden dat het laagste punt 
 # van het standard-brain-naar-patient-space de ondergrens van het no-neck brain wordt. 
 
 if [[ "$1" == "" ]]; then
