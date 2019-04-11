@@ -1,4 +1,4 @@
-made from http://en.wikipedia.org/wiki/File:Human-brain.SVG as follows:
+made from https://upload.wikimedia.org/wikipedia/commons/3/33/Human-brain.SVG as follows:
 - used inkscape to create BW eps
 - used  pstoimg to create BW png
 - in GIMP
