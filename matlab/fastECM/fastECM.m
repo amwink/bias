@@ -590,7 +590,9 @@ if (exist ('connmat_out') == 1)
   write_map (inputfile, M, msk,    atl, clustering, 'clustering', 'clustering');
   write_map (inputfile, M, msk,    atl, pathlength, 'path_length', 'pathlength');
   
-  % also make a readable file
+  % also make readable files
+  matfile=[fd filesep fn '_fastECM.mat'];    
+  save (matfile,'vcurr_out');
   xmlfile = [fd filesep fn '_fastECMstats.xml'];
   fid = fopen (xmlfile, 'w');
   if (fid> (-1) ) 
