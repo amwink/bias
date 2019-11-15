@@ -21,7 +21,7 @@ CD=${PWD}
 #  (c) Alle Meije Wink 2015 (a.wink@vumc.nl)
 # 
 
-if [[ ${3} == "" ]]; then
+catdocif [[ ${3} == "" ]]; then
    cat ${0}|grep '# '|head -19|sed -e 's|# |    |g'
    exit 1;
 fi
@@ -43,10 +43,10 @@ if [[ `which xls2csv 2> /dev/null` == "" ]]; then
 		wget -N http://www.cbv.ns.ca/owl/DOCS/tools/catdoc-0.94.2-win32.zip
 		unzip -o catdoc-0.94.2-win32.zip 
 	    else
-		wget -N http://www.cbv.ns.ca/owl/DOCS/tools/catdoc-0.94.2.tar.gz
-		tar zxvf catdoc-0.94.2.tar.gz
+		wget -N http://ftp.wagner.pp.ru/pub/catdoc/catdoc-0.95.tar.gz
+		tar zxvf catdoc-0.95.tar.gz
 	    fi   
-	    mv catdoc-0.94.2 catdoc
+	    mv catdoc-0.95 catdoc
 	fi
 	cd catdoc; 
 	./configure --prefix=${PWD%/*}; 
