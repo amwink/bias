@@ -1,0 +1,214 @@
+# depslib dependency file v1.0
+1572952200 source:c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\week3\week3.cpp
+	<iostream>
+	<utility>
+	"image.hpp"
+
+1572952200 "
+
+1572950558 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\week3\image.hpp
+	<vector>
+	<initializer_list>
+	"CImg/CImg.h"
+	"niftiio.hpp"
+
+1572950558 pp"
+
+1568963562 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\cimg\cimg.h
+	<cstdio>
+	<cstdlib>
+	<cstdarg>
+	<cstring>
+	<cmath>
+	<cfloat>
+	<climits>
+	<ctime>
+	<exception>
+	<algorithm>
+	<stdio.h>
+	<sys/types.h>
+	<sys/time.h>
+	<sys/stat.h>
+	<unistd.h>
+	<dirent.h>
+	<fnmatch.h>
+	<windows.h>
+	<shlobj.h>
+	<process.h>
+	<io.h>
+	<initializer_list>
+	<utility>
+	<omp.h>
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+	<X11/keysym.h>
+	<pthread.h>
+	<sys/ipc.h>
+	<sys/shm.h>
+	<X11/extensions/XShm.h>
+	<X11/extensions/Xrandr.h>
+	<cstddef>
+	<opencv2/opencv.hpp>
+	"png.h"
+	"jpeglib.h"
+	"setjmp.h"
+	"tiffio.h"
+	"minc_io_simple_volume.h"
+	"minc_1_simple.h"
+	"minc_1_simple_rw.h"
+	"zlib.h"
+	"curl/curl.h"
+	"Magick++.h"
+	"fftw3.h"
+	"Board.h"
+	"ImfRgbaFile.h"
+	"ImfInputFile.h"
+	"ImfChannelList.h"
+	"ImfMatrixAttribute.h"
+	"ImfArray.h"
+	"tinyexr.h"
+	"CImg.h"
+
+1571580603 
+
+1367191429 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\z\zlib.h
+	"zconf.h"
+
+1568724484 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\z\zconf.h
+	<windows.h>
+	<limits.h>
+	<sys/types.h>
+	<stdarg.h>
+	<stddef.h>
+	<unistd.h>
+	<unixio.h>
+
+1571815850 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\week3\niftiio.hpp
+	<iostream>
+	<iomanip>
+	"nifti1_io.h"
+
+1571815850 .h"
+
+1571580603 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\nifti\include\nifti1_io.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<ctype.h>
+	"nifti1.h"
+	"znzlib.h"
+
+1571588261 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\nifti\include\nifti1.h
+
+1571589173 c:\users\amwink\documents\courses\advanced_image_processing\practice_aipcpp\znz\include\znzlib.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdarg.h>
+	"itk_zlib.h"
+	"zlib.h"
+
+1573747189 source:/home/amwink/work/courses/advanced_image_processing/practice_aipcpp/week3/week3.cpp
+	<iostream>
+	<utility>
+	"image.hpp"
+
+1573747714 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/week3/image.hpp
+	<vector>
+	<numeric>
+	<initializer_list>
+	"CImg/CImg.h"
+	"niftiio.hpp"
+
+1568963562 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/CImg/CImg.h
+	<cstdio>
+	<cstdlib>
+	<cstdarg>
+	<cstring>
+	<cmath>
+	<cfloat>
+	<climits>
+	<ctime>
+	<exception>
+	<algorithm>
+	<stdio.h>
+	<sys/types.h>
+	<sys/time.h>
+	<sys/stat.h>
+	<unistd.h>
+	<dirent.h>
+	<fnmatch.h>
+	<windows.h>
+	<shlobj.h>
+	<process.h>
+	<io.h>
+	<initializer_list>
+	<utility>
+	<omp.h>
+	<X11/Xlib.h>
+	<X11/Xutil.h>
+	<X11/keysym.h>
+	<pthread.h>
+	<sys/ipc.h>
+	<sys/shm.h>
+	<X11/extensions/XShm.h>
+	<X11/extensions/Xrandr.h>
+	<cstddef>
+	<opencv2/opencv.hpp>
+	"png.h"
+	"jpeglib.h"
+	"setjmp.h"
+	"tiffio.h"
+	"minc_io_simple_volume.h"
+	"minc_1_simple.h"
+	"minc_1_simple_rw.h"
+	"zlib.h"
+	"curl/curl.h"
+	"Magick++.h"
+	"fftw3.h"
+	"Board.h"
+	"ImfRgbaFile.h"
+	"ImfInputFile.h"
+	"ImfChannelList.h"
+	"ImfMatrixAttribute.h"
+	"ImfArray.h"
+	"tinyexr.h"
+	"CImg.h"
+
+1367191430 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/z/zlib.h
+	"zconf.h"
+
+1568724484 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/z/zconf.h
+	<windows.h>
+	<limits.h>
+	<sys/types.h>
+	<stdarg.h>
+	<stddef.h>
+	<unistd.h>
+	<unixio.h>
+
+1571815852 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/week3/niftiio.hpp
+	<iostream>
+	<iomanip>
+	"nifti1_io.h"
+
+1571580604 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/nifti/include/nifti1_io.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<math.h>
+	<ctype.h>
+	"nifti1.h"
+	"znzlib.h"
+
+1571588262 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/nifti/include/nifti1.h
+
+1571589174 /home/amwink/work/courses/advanced_image_processing/practice_aipcpp/znz/include/znzlib.h
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<stdarg.h>
+	"itk_zlib.h"
+	"zlib.h"
+
