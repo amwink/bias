@@ -21,7 +21,7 @@ CD=${PWD}
 #  (c) Alle Meije Wink 2015 (a.wink@vumc.nl)
 # 
 
-catdocif [[ ${3} == "" ]]; then
+if [[ ${3} == "" ]]; then
    cat ${0}|grep '# '|head -19|sed -e 's|# |    |g'
    exit 1;
 fi
