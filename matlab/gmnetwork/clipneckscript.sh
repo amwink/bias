@@ -1,0 +1,1 @@
+../../scripts/bash/clipneckscript/clipneckscript.sh
