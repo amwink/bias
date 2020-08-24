@@ -12,6 +12,12 @@ function [ max_nonzero_cubes, bestoffset, greymatter ] = cube_grid_position( tem
 % bestoffset        = list of 1D cube offsets at the optimal position
 % greymatter        = grey matter intensities sampled at these offsets
 %
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 
 

@@ -29,7 +29,12 @@ function all_rot = cube_rotations ( cubesize, add_diagonals )
 % This function returns the new positions for all rotions that are
 % multiples of 45 degrees around the X, Y and Z axes.
 %
-
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 
 % This works for 3x3x3 voxel-cubes (aka Rubik's cube)

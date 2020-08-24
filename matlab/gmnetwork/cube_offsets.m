@@ -13,7 +13,12 @@ function offsets = cube_offsets ( template, cubesize )
 %  >> test = reshape ( test, [ n*n*n length(test)/n/n/n ] );
 %  >> test ( :, 1:10 )  
 %
-
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 
 % standard MNI image with 2x2x2 mm^3 voxels

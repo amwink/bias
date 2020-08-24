@@ -8,6 +8,16 @@ function [ ori_corr, ran_corr ] = gmnetwork ( gmmap, template, prefix );
 % [optional]
 % prefix   - alternative name to look for already registered gmmap
 %
+% Pleas give credit where it's due: this is an implementation of the method described in:
+%
+%      Similarity-based extraction of individual networks from gray matter MRI scans 
+%      Betty Marije Tijms, Peggy Seriès, David John Willshaw, Stephen MacGregor Lawrie
+%      Cerebral Cortex 22 (7): pages 1530-41, July 2012.
+%      https://doi.org/10.1093/cercor/bhr221
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 
 

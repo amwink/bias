@@ -10,8 +10,12 @@ function [ ori_corr, ran_corr ] = cube_cross_correlation ( gm_incubes, gm_random
 % ori_corr: result of the above procedure on the observed GM densities
 % ran_corr: the same procedure on grey matter at permuted voxel locations
 %
-
-
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 % different orderings cofficients for cubes rotated at different angles
 angles = cube_rotations ( cubesize, add_diag );

@@ -1,8 +1,11 @@
-%-----------------------------------------------------------------------
-% Job saved on 05-Mar-2020 17:23:36 by cfg_util (rev $Rev: 6460 $)
-% spm SPM - SPM12 (6906)
-% cfg_basicio BasicIO - Unknown
-%-----------------------------------------------------------------------
+%
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
+
 matlabbatch{1}.cfg_basicio.file_dir.file_ops.file_fplist.dir = { [ pwd filesep 'images' ] };
 matlabbatch{1}.cfg_basicio.file_dir.file_ops.file_fplist.filter = '^co.*_noneck\.nii$';
 matlabbatch{1}.cfg_basicio.file_dir.file_ops.file_fplist.rec = 'FPListRec';

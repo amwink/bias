@@ -1,8 +1,10 @@
-%-----------------------------------------------------------------------
-% Job saved on 12-Mar-2020 16:30:21 by cfg_util (rev $Rev: 7345 $)
-% spm SPM - SPM12 (7771)
-% cfg_basicio BasicIO - Unknown
-%-----------------------------------------------------------------------
+%
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 matlabbatch{1}.spm.spatial.coreg.estwrite.ref    = { '/usr/local/spm12/canonical/avg305T1.nii,1'         };
 matlabbatch{1}.spm.spatial.coreg.estwrite.source = { [pwd filesep 'images' filesep 'T1_noneck.nii,1'   ] };
 matlabbatch{1}.spm.spatial.coreg.estwrite.other  = { [pwd filesep 'images' filesep 'c1T1_noneck.nii,1' ] };

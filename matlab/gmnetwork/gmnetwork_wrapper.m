@@ -7,7 +7,13 @@ function gmnetwork_wrapper;
 %
 % You can use this as an example to build your own script.
 % (this is by no means a need-to-do-it-this-way template!)
-% 
+%
+% This script may be used to support the script 'gmnetworks.m' in 
+% this directory; please read its header for credit and copyright.
+%
+% (C) Alle Meije Wink, 2020
+%     a.wink@amsterdamumc.nl
+%
 
 % from the Matlab prompt, run
 % >> profile on; gmnet_wrapper; profile off
