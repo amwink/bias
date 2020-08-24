@@ -8,7 +8,7 @@ function [ ori_corr, ran_corr ] = gmnetwork ( gmmap, template, prefix );
 % [optional]
 % prefix   - alternative name to look for already registered gmmap
 %
-% Pleas give credit where it's due: this is an implementation of the method described in:
+% Please give credit where it's due: this is an implementation of the method described in:
 %
 %      Similarity-based extraction of individual networks from gray matter MRI scans 
 %      Betty Marije Tijms, Peggy Seriès, David John Willshaw, Stephen MacGregor Lawrie
@@ -23,10 +23,10 @@ function [ ori_corr, ran_corr ] = gmnetwork ( gmmap, template, prefix );
 
 % we need SPM12 and nifti toolbox
 if ( exist ( 'spm' ) ~= 2 )
-  error ( '  SPM still not found, try (re-)installing ...' );
+  error ( '  SPM not found, try (re-)installing ...' );
 end
 if ( exist ( 'load_nii' ) ~= 2 )
-  error ( 'please install Jimmy Shen''s NIfTI toolbox for .nii.gz support ...' );
+  error ( '  Jimmy Shen''s NIfTI toolbox for .nii.gz support not found, try (re-)installing ...' );
 end;
 
 
