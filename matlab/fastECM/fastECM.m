@@ -590,10 +590,10 @@ if (exist ('connmat_out') == 1)
   write_map (inputfile, M, msk,    atl, clustering, 'clustering', 'clustering');
   write_map (inputfile, M, msk,    atl, pathlength, 'path_length', 'pathlength');
   
-  % also make readable files
-  matfile=[fd filesep fn '_fastECM.mat'];    
-  save (matfile,'vcurr_out');
+  % also make readable files: .mat and office-compatible XML
+  matfile =[fd filesep fn '_fastECMstats.mat'];    
   xmlfile = [fd filesep fn '_fastECMstats.xml'];
+  fastECMstats.fastECM = vcurr_out;
   fid = fopen (xmlfile, 'w');
   if (fid> (-1) ) 
     
@@ -604,30 +604,46 @@ if (exist ('connmat_out') == 1)
     if ( exist ('dvcurr') == 1 ) 
       
       writetosheet (fid, dvcurr, 'degCM');
+      fastECMstats.degCM = dvcurr;
       
     end
     
     if ( (exist ('rvcurr') == 1) & rankmap ) 
       
       writetosheet (fid, rvcurr, 'rankECM');
+      fastECMstats.rankECM = rvcurr;     
       
     end
     
     if ( exist ('nvcurr') == 1 ) 
       
       writetosheet (fid, nvcurr, 'normECM');
+      fastECMstats.normECM = nvcurr;
       
     end
     
-    %writetosheet (fid, connmat_out, 'connections'); % crashes spreadsheet program
-    %writetosheet (fid, vcurr_bin, 'backbone'); % crashes spreadsheet program
+    % these variables cannot be written to spreadsheet 
+    % for some reason, but they can be saved as a .mat
+    %
+    %writetosheet (fid, connmat_out, 'connections');    % crashes spreadsheet program
+    fastECMstats.connections = connmat_out;
+    %writetosheet (fid, vcurr_bin, 'backbone');         % crashes spreadsheet program
+    fastECMstats.backbone = vcurr_bin;
+
     writetosheet (fid, communities, 'communities'); 
+    fastECMstats.communities = communities;
     writetosheet (fid, betweenness, 'betweenness');
+    fastECMstats.betweenness = betweenness;
     writetosheet (fid, clustering, 'clustering');
+    fastECMstats.clustering = clustering;
     writetosheet (fid, pathlength, 'path_length');
+    fastECMstats.path_length = pathlength;
     fprintf (fid, '</ss:Workbook>\n');
     fclose (fid);
-    
+
+    % write fastECMstats to a .mat file
+    save (matfile,'fastECMstats');
+ 
   end % if fid
   
 end % if connmat_out
