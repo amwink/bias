@@ -31,12 +31,12 @@ if [[ ${FSLDIR} == "" || ! -e ${FSLDIR} ]]; then
     echo "variable FSLDIR (or its directory) doesn't exist."
     exit
 fi
-TEMPLATE_BRAIN=${FSLDIR}/data/standard/avg152T1_brain.nii.gz
+TEMPLATE_BRAIN=${FSLDIR}/data/standard/MNI152_T1_1mm_brain.nii.gz
 
 # threshold for excluding inside (lower for less ventricle excluded)
-HITHRESH=3500;
+HITHRESH=3000;
 # threshold for lenient mask (should always be lower than HITHRESH)
-LOTHRESH=2500;
+LOTHRESH=2000;
 
 # Do everything in the current directory
 CD=${PWD}
@@ -44,14 +44,11 @@ CD=${PWD}
 # Make a mask that excludes at least the ventricles.
 CM="flirt -in ${TEMPLATE_BRAIN} -ref ${TEMPLATE_BRAIN} -out ${CD}/standard -applyisoxfm ${1}";doit "${CM}"
 CM="${FSLDIR}/bin/fslmaths ${CD}/standard -thr ${HITHRESH} -bin ${CD}/ventrmask";doit "${CM}"
-CM="gzip -fd ${CD}/ventrmask.nii.gz ${CD}/standard.nii.gz";doit "${CM}"
 
 # Use this mask to make a hull mask: purge 
 # the outside, but leave the inside intact.
 # The resulting image is called standardhull.
-SCRIPTDIR=${0%/*}
-CM="matlab -nosplash -nodesktop < ${SCRIPTDIR}/ventrmask.m";doit "${CM}" 2> /dev/null;echo 
-CM="gzip -f9 ${CD}/ventrmask.nii ${CD}/standardhull.nii ${CD}/standard.nii";doit "${CM}"
+CM="python3 ${CD}/ventrmask.py";doit "${CM}"
 
 # Now the first (ventricle mask) is inverted 
 # and multiplied by the standard hull mask.
@@ -63,7 +60,7 @@ CM="fslmaths ${CD}/ventrmask -mul -1 -add 1 -mul ${CD}/standardhull ${CD}/ventrm
 # make a bigger brain mask.
 # The ventricle mask is subtracted and only
 # the surviving voxels (value >0) are included.
-CM="fslmaths ${CD}/standard -thr ${LOTHRESH} -bin -sub ventrmask standardmask";doit "${CM}"
+CM="fslmaths ${CD}/standard -thr ${LOTHRESH} -add ${CD}/standardhull -bin -sub ventrmask -bin standardmask";doit "${CM}"
 
 exit 0;
 

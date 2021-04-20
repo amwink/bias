@@ -21,6 +21,7 @@ function offsets = cube_offsets ( template, cubesize )
 %
 
 
+
 % standard MNI image with 2x2x2 mm^3 voxels
 Timg = load_untouch_header_only ( template );
 dimx = Timg.dime.dim(2);

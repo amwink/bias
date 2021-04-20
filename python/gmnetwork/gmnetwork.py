@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Created on Mon Sep 28 19:36:21 2020
 
+@author: amwink
+"""
 
 
 # import general libraries os      (for handling files/directories), 
