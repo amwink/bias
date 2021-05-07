@@ -36,10 +36,12 @@ def main():
     parser = argparse.ArgumentParser();
     parser.add_argument ( "-m", "--mrifiles",   help="text file with paths to NIfTIs of T1 scans", 
                           dest="mri_file", default="mr_images.txt" );
-    parser.add_argument ( "-g", "--greymatter", help="text file with paths extracted GM density maps", 
+    parser.add_argument ( "-g", "--greymatter", help="text file with paths of extracted GM density maps", 
                           dest="gm_file", default="gm_masks.txt" );
+    parser.add_argument ( "-a", "--atlasfiles", help="text file with paths to native-space atlas maps", 
+                          dest="at_file", default="at_maps.txt" );
     parser.add_argument ( "-t", "--template",   help="path to MNI-space T1 template", 
-                          default="/usr/share/fsl/data/standard/MNI152lin_T1_2mm.nii.gz" );
+                          default="/usr/local/fsl/data/standard/MNI152_T1_2mm.nii.gz" );
     args = parser.parse_args();
 
     # MNI-space template
@@ -55,12 +57,17 @@ def main():
     with open( gm_file, 'r' ) as filehandle:
         gm_files = [ current_place.rstrip() for current_place in filehandle.readlines() ];
 
+    # load T1 native-space atlas filenames from a list
+    at_file = args.at_file;    
+    with open( at_file, 'r' ) as filehandle:
+        at_files = [ current_place.rstrip() for current_place in filehandle.readlines() ];
+
     # process them in pairs to build GM networks
-    for mr, gm in zip ( mri_files, gm_files ):
-        print ( 'processing MR scan and GM density map \n\t  {0:s}\n\t{1:s}'.format( mr, gm ) );
+    for mr, gm, at in zip ( mri_files, gm_files, at_files ):
+        print ( 'processing MR scan and GM density map with atlas \n\t  {0:s}\n\t{1:s}\n\t{2:s}'.format( mr, gm, at ) );
 
         start = time.process_time();
-        obs_ran_net, net_file_name = gm_network ( mr, gm, mni_t1_template );
+        obs_ran_net, net_file_name = gm_network ( mr, gm, at, mni_t1_template );
         print ( 'finished in {:.2f}s'.format( time.process_time() - start) );
 
         print ( "filename: {}  ".format ( net_file_name     ) );
@@ -74,9 +81,11 @@ def main():
 
 
 
-def gm_network ( mr_filename, gm_filename, template_mr ):
+def gm_network ( mr_filename, gm_filename, at_filename, template_mr ):
        
     new_gmfilename = os.path.abspath (gm_filename).replace (".nii","_mni.nii");
+    new_atfilename = os.path.abspath (at_filename).replace (".nii","_mni.nii");
+    
     networks = 0;
     
     if not ( ( os.path.isfile ( new_gmfilename )  ) or ( os.path.islink ( new_gmfilename ) ) ):
@@ -84,56 +93,70 @@ def gm_network ( mr_filename, gm_filename, template_mr ):
         print ( 'file {} does not exist'.format ( new_gmfilename ) );
         print ( 'performing registration to MNI ... ', end = '' );
         start = time.process_time();
-                
-        # see https://dipy.org/documentation/1.2.0./examples_built/ ..
-        #           .. affine_registration_3d/#example-affine-registration-3d
-        static, static_affine = load_nifti( template_mr );      
-        moving, moving_affine = load_nifti( mr_filename );       
-        grey,   grey_affine   = load_nifti( gm_filename );
 
-        # first initialise by putting centres of mass on top of each other
-        c_of_mass  = transform_centers_of_mass ( static, static_affine, moving, moving_affine );
+        # see if we can maybe find a transform
+        tf_filename = os.path.abspath (gm_filename).split('.nii')[0] + "_reg.npz";
+        if not ( ( os.path.isfile ( tf_filename )  ) or ( os.path.islink ( tf_filename ) ) ):
 
-        # initialise transform parameters (e.g. the mutual information criterion)
-        # these parameters won' need to be changed between the different stages
-        nbins           = 64
-        sampling_prop   = None
-        metric          = MutualInformationMetric ( nbins, sampling_prop );
-        level_iters     = [ 25, 15, 5 ];
-        sigmas          = [ 2,  1,  0 ];
-        factors         = [ 4,  2,  1 ];
-        affreg          = AffineRegistration ( metric = metric, level_iters = level_iters, sigmas = sigmas, factors = factors );
-
-        # give slightly more degrees of freedom, by allowing translation of centre of gravity
-        print ( '\nTranslation only:' );
-        transform   = TranslationTransform3D();
-        params0     = None;
-        translation = affreg.optimize ( static, moving, transform, params0, static_affine, moving_affine, starting_affine = c_of_mass.affine );
-
-        # refine further by allowing all rigid transforms (rotations/translations around the centre of gravity)
-        print ( 'Rigid transform:' );
-        transform = RigidTransform3D();
-        params0   = None;
-        rigid     = affreg.optimize ( static, moving, transform, params0, static_affine, moving_affine, starting_affine = translation.affine );
-
-        full_affine = False; # the GM networks method is based on keeping the cortical shape intact
-        
-        if ( full_affine ):
-
-            # refine to a full affine transform by adding scaling and shearing
-            print ( 'Affine transform:' );
-            transform = AffineTransform3D();
-            params0   = None;
-            affine    = affreg.optimize(static, moving, transform, params0, static_affine, moving_affine, starting_affine = rigid.affine );
-            final     = affine;
-        
-        else:   
+            # see https://dipy.org/documentation/1.2.0./examples_built/ ..
+            #           .. affine_registration_3d/#example-affine-registration-3d
+            static, static_affine = load_nifti ( template_mr );      
+            moving, moving_affine = load_nifti ( mr_filename );       
+            grey,   grey_affine   = load_nifti ( gm_filename );
+            atl,    atl_affine    = load_nifti ( at_filename );
             
-            final     = rigid;
+            # first initialise by putting centres of mass on top of each other
+            c_of_mass  = transform_centers_of_mass ( static, static_affine, moving, moving_affine );
+            
+            # initialise transform parameters (e.g. the mutual information criterion)
+            # these parameters won' need to be changed between the different stages
+            nbins           = 64
+            sampling_prop   = None
+            metric          = MutualInformationMetric ( nbins, sampling_prop );
+            level_iters     = [ 25, 15, 5 ];
+            sigmas          = [ 2,  1,  0 ];
+            factors         = [ 4,  2,  1 ];
+            affreg          = AffineRegistration ( metric = metric, level_iters = level_iters, sigmas = sigmas, factors = factors );
+            
+            # give slightly more degrees of freedom, by allowing translation of centre of gravity
+            print ( '\nTranslation only:' );
+            transform   = TranslationTransform3D();
+            params0     = None;
+            translation = affreg.optimize ( static, moving, transform, params0, static_affine, moving_affine, starting_affine = c_of_mass.affine );
         
+            # refine further by allowing all rigid transforms (rotations/translations around the centre of gravity)
+            print ( 'Rigid transform:' );
+            transform = RigidTransform3D();
+            params0   = None;
+            rigid     = affreg.optimize ( static, moving, transform, params0, static_affine, moving_affine, starting_affine = translation.affine );
+            
+            full_affine = False; # the GM networks method is based on keeping the cortical shape intact
+        
+            if ( full_affine ):
+                
+                # refine to a full affine transform by adding scaling and shearing
+                print ( 'Affine transform:' );
+                transform = AffineTransform3D();
+                params0   = None;
+                affine    = affreg.optimize(static, moving, transform, params0, static_affine, moving_affine, starting_affine = rigid.affine );
+                final     = affine;
+                
+            else:   
+
+                final     = rigid;
+
+            np.savez ( tf_filename, final );
+
+        else:
+
+            with np.load ( tf_filename, allow_pickle = True ) as npzfile:
+                final = npzfile [ 'arr_0' ];
+                
         # transform the grey matter data instead of the MRI itself       
         resampled = final.transform ( grey );
         save_nifti ( new_gmfilename, resampled, static_affine );
+        resampled = final.transform (  atl );
+        save_nifti ( new_atfilename, resampled, static_affine );
         
         print ( 'finished in {:.2f}s'.format( time.process_time() - start ) );
        
@@ -323,7 +346,7 @@ def cube_rotations ( cube_size, diagonals ):
 #         3 6 7 ];
 #
 # Because this is algebraically correct; a45(a45) = a90, and so on,
-# this corresponds to rotating around the Z axis. other rotations 
+# this corresponds to rotating around the Z axis. Other rotations 
 # are harder to visualise. 
 #
 # This function returns the new positions for all rotions that are
