@@ -7,15 +7,21 @@ Created on Mon Sep 28 19:36:21 2020
 """
 
 
-# import general libraries os      (for handling files/directories), 
-#                          time    (for reporting processing times),
-#                          numpy   (for all the numerical routines),
-#                          nibabel (for reading/writing NIfTI files)
+# import general libraries os       (for handling files/directories), 
+#                          time     (for reporting processing times),
+#                          pickle   (for saving / loading transforms),
+#                          argparse (for processing command line args),
+#                          numpy    (for all the numerical routines),
+#                          nibabel  (for reading/writing NIfTI files)
 import os;
 import time;
+import pickle;
 import argparse;
 import numpy as np;
 import nibabel as nib;
+
+# use scipy.stats.mode
+from scipy import stats;
 
 # import routines from the dipy package (dipy.org)
 # for performing 3D image registration / resamplng
@@ -64,18 +70,26 @@ def main():
 
     # process them in pairs to build GM networks
     for mr, gm, at in zip ( mri_files, gm_files, at_files ):
-        print ( 'processing MR scan and GM density map with atlas \n\t  {0:s}\n\t{1:s}\n\t{2:s}'.format( mr, gm, at ) );
+        print ( 'processing MR scan (1) and GM density (2) map with atlas (3)\n\t  {0:s} (1)\n\t{1:s} (2)\n\t{2:s} (3)'.format( mr, gm, at ) );
 
         start = time.process_time();
         obs_ran_net, net_file_name = gm_network ( mr, gm, at, mni_t1_template );
-        print ( 'finished in {:.2f}s'.format( time.process_time() - start) );
+        print ( 'cube network finished in {:.2f}s'.format( time.process_time() - start) );
 
-        print ( "filename: {}  ".format ( net_file_name     ) );
-        print ( "# points: {}\n".format ( obs_ran_net.shape ) );
+        print ( "filename: {}".format ( net_file_name     ), end = '\t' );
+        print ( "# points: {}".format ( obs_ran_net.shape ) );
         
-        # not yet implemented
-        # process_atlas_networks ( obs_ran_net, net_file_name, native_atlas );
+        # group cube connections in atlas regions
+        print ( 'grouping cube connections in atlas regions ...', end = ''  );        
+        start = time.process_time();
+        atlas_network, atlas_cubes = process_atlas_networks ( obs_ran_net, net_file_name, at );
+        print ( 'done' );
 
+        print ( "atlas network file: {}  ".format ( atlas_network ) );
+        print ( "cube-to-atlas file: {}\n".format ( atlas_cubes   ) );
+
+
+        
 ################################################################################
 ################################################################################
 
@@ -88,22 +102,24 @@ def gm_network ( mr_filename, gm_filename, at_filename, template_mr ):
     
     networks = 0;
     
-    if not ( ( os.path.isfile ( new_gmfilename )  ) or ( os.path.islink ( new_gmfilename ) ) ):
+    if (   not ( ( os.path.isfile ( new_gmfilename )  ) or ( os.path.islink ( new_gmfilename ) ) )
+        or not ( ( os.path.isfile ( new_atfilename )  ) or ( os.path.islink ( new_atfilename ) ) ) ):
 
-        print ( 'file {} does not exist'.format ( new_gmfilename ) );
+        grey,   grey_affine   = load_nifti ( gm_filename );
+        atl,    atl_affine    = load_nifti ( at_filename );
+
+        print ( 'file {} \n and {}\nshould both exist'.format ( new_gmfilename, new_atfilename ) );
         print ( 'performing registration to MNI ... ', end = '' );
         start = time.process_time();
 
         # see if we can maybe find a transform
-        tf_filename = os.path.abspath (gm_filename).split('.nii')[0] + "_reg.npz";
+        tf_filename = os.path.abspath (gm_filename).split('.nii')[0] + "_reg.pkl";
         if not ( ( os.path.isfile ( tf_filename )  ) or ( os.path.islink ( tf_filename ) ) ):
 
             # see https://dipy.org/documentation/1.2.0./examples_built/ ..
             #           .. affine_registration_3d/#example-affine-registration-3d
             static, static_affine = load_nifti ( template_mr );      
             moving, moving_affine = load_nifti ( mr_filename );       
-            grey,   grey_affine   = load_nifti ( gm_filename );
-            atl,    atl_affine    = load_nifti ( at_filename );
             
             # first initialise by putting centres of mass on top of each other
             c_of_mass  = transform_centers_of_mass ( static, static_affine, moving, moving_affine );
@@ -145,17 +161,18 @@ def gm_network ( mr_filename, gm_filename, at_filename, template_mr ):
 
                 final     = rigid;
 
-            np.savez ( tf_filename, final );
+            with open( tf_filename, "wb" ) as pickle_file:
+                pickle.dump ( [ final, static_affine ], pickle_file );
 
         else:
 
-            with np.load ( tf_filename, allow_pickle = True ) as npzfile:
-                final = npzfile [ 'arr_0' ];
+            with open( tf_filename, "rb" ) as input_file:
+                final, static_affine = pickle.load ( input_file );
                 
         # transform the grey matter data instead of the MRI itself       
-        resampled = final.transform ( grey );
+        resampled = final.transform ( grey, interpolation = 'linear' );
         save_nifti ( new_gmfilename, resampled, static_affine );
-        resampled = final.transform (  atl );
+        resampled = final.transform (  atl, interpolation = 'nearest' );
         save_nifti ( new_atfilename, resampled, static_affine );
         
         print ( 'finished in {:.2f}s'.format( time.process_time() - start ) );
@@ -436,7 +453,7 @@ def cube_cross_correlation ( observed_columns, random_columns, cube_side, use_di
         rot_ran = c_ran [ angles ];
         
         if ( not ( index_i % 100 ) ):
-            print ( 'cube {}'.format( index_i ), end='\r' );
+            print ( 'cube {} of {}'.format( index_i, num_columns ), end='\r' );
         
         for index_j in range ( index_i + 1, num_columns ):
             
@@ -456,6 +473,71 @@ def cube_cross_correlation ( observed_columns, random_columns, cube_side, use_di
     
 
 
+################################################################################
+################################################################################
+
+
+
+def process_atlas_networks ( networks_content, networks_filename, atlas_filename ):
+
+    cubes_filename = os.path.abspath ( networks_filename ).replace ( "_gmnet.nii", "_cubes.nii" );
+    new_atfilename = os.path.abspath ( atlas_filename ).replace ( ".nii", "_mni.nii"   );
+    
+    # newgm_content = np.asarray ( nib.load ( new_gmfilename ).dataobj ); # load mni-resampled gm file
+    atlas_content   = np.asarray ( nib.load ( new_atfilename ).dataobj ); # loat mni-resampled atlas file
+    cube_content    = np.asarray ( nib.load ( cubes_filename ).dataobj ); # loat cube indices file
+
+    # array of cube indices in used voxels (beware 'where' numbering starts at x=0, cube indices start at z=0)
+    cube_indices  = cube_content  [ np.where ( cube_content > 0 ) ];
+    atlas_indices = atlas_content [ np.where ( cube_content > 0 ) ];
+
+    # select to which atlas region each cube belongs (winner takes all: region with most coefficients)
+    atl_size  = int ( np.max ( atlas_content ) );
+    cub_size  = int ( np.max (  cube_content ) );
+    incube    = int ( cube_indices.shape[0] / cub_size );
+
+    # use the indices to sort cubes by index
+    cubeorder = cube_indices.argsort();
+    # Now: in cube_indices [ cubeorder ].reshape ( 7174, 27 ).transpose() each cube is a column
+    #      (see the final shape of offset in cube_grid_position() )
+    # We need the sorted atlas indices though
+    atlas_labels = atlas_indices [ cubeorder ].reshape ( cub_size, incube ).transpose();
+
+    # now assign an atlas label to every cube index by taking the mode (most frequent label [that is >0] )
+    atlas_labels [ atlas_labels == 0 ] = np.NaN;
+    cube2atlas = stats.mode ( atlas_labels ).mode[0];
+    cube2atlas [ np.isnan ( cube2atlas ) ] = 0;
+    cube2atlas = cube2atlas.astype ( int );
+
+    # save the cube assignments to file
+    cube_indices = [ cube2atlas [ i-1 ] for i in cube_indices.astype ( int ) ];
+    cube_content  [ np.where ( cube_content > 0 ) ] = cube_indices;
+    atlas_map  = nib.Nifti1Image( cube_content, nib.load ( cubes_filename ).affine );
+    cubes_in_atlas = cubes_filename [ :cubes_filename.index ( ".nii" ) ] + "_" + os.path.basename ( atlas_filename );
+    atlas_map.to_filename ( cubes_in_atlas );    
+    
+    # create atlas-to-atlas network (for observed data)
+    obsnet_full = networks_content [ :, :, 0 ];
+    obsnet_full = obsnet_full + obsnet_full.transpose();
+    rannet_full = networks_content [ :, :, 1 ];
+    rannet_full = rannet_full + rannet_full.transpose();
+
+    # atlas network matrix: average row and column contributions for each region
+    atlnet = np.zeros( ( atl_size, atl_size, 2 ) );
+    for i in range ( atl_size ):
+        for j in range ( i, atl_size ):
+            i_indices = np.where ( cube2atlas == i+1 )[0];
+            j_indices = np.where ( cube2atlas == j+1 )[0];
+            atlnet [ i, j, 0 ] = np.mean ( obsnet_full [ np.ix_( i_indices, j_indices ) ] );
+            atlnet [ i, j, 1 ] = np.mean ( rannet_full [ np.ix_( i_indices, j_indices ) ] );
+
+    # save the atlas network to a file
+    networks_map  = nib.Nifti1Image( atlnet, np.eye(4) );
+    atlas_connections = networks_filename [ :networks_filename.index ( ".nii" ) ] + "_" + os.path.basename ( atlas_filename );
+    networks_map.to_filename ( atlas_connections );
+
+    return atlas_connections, cubes_in_atlas;
+            
 ################################################################################
 ################################################################################
 
