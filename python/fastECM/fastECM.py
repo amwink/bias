@@ -188,7 +188,6 @@ def write_map (inputfile='',
     vout=msk.astype('float32')                   # output: zero outside mask                     
     vout[np.nonzero(msk)]=vcurr                  # put vcurr inside mask
     vout=np.reshape(vout,msz).astype('float32')  # resize to volume 
-    print vout.dtype
     
     img_out=nib.Nifti1Image(vout,img.get_affine())
     img_out.to_filename(outputfile)   

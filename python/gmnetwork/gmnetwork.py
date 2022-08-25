@@ -24,7 +24,7 @@ import nibabel as nib;
 from scipy import stats;
 
 # import routines from the dipy package (dipy.org)
-# for performing 3D image registration / resamplng
+# for performing 3D image registration / resampling
 from dipy.io.image import ( load_nifti, save_nifti );
 from dipy.align.imaffine import ( transform_centers_of_mass, MutualInformationMetric, AffineRegistration );
 from dipy.align.transforms import ( TranslationTransform3D, RigidTransform3D, AffineTransform3D );
@@ -388,7 +388,7 @@ def cube_rotations ( cube_size, diagonals ):
     z270 = z90 [ z180 ];
     z315 = z45 [ z270 ];
 
-    # rotation over x goes similarly
+    # rotation over Y goes similarly
     yfl  = np.flip ( rcube, 1 ).flatten();
     y45  = np.asarray ( [ 21, 22, 23, 18, 19, 20, 9, 10, 11, 24, 25, 26, 12, 13, 14, 0, 1, 2, 15, 16, 17, 6, 7, 8, 3, 4, 5 ] );
     y90  = np.rot90 ( rcube, 1, axes = ( 0, 1 ) ).flatten();
@@ -398,7 +398,7 @@ def cube_rotations ( cube_size, diagonals ):
     y270 = y90 [ y180 ];
     y315 = y45 [ y270 ];
     
-    # rotation over x goes similarly
+    # rotation over X goes similarly
     xfl  = np.flip ( rcube, 2 ).flatten();
     x45  = np.asarray ( [ 1, 2, 11, 4, 5, 14, 7, 8, 17, 0, 10, 20, 3, 13, 23, 6, 16, 26, 9, 18, 19, 12, 21, 22, 15, 24, 25 ] );
     x90  = np.rot90 ( rcube, 1, axes = ( 0, 2 ) ).flatten();
@@ -480,16 +480,16 @@ def cube_cross_correlation ( observed_columns, random_columns, cube_side, use_di
 
 def process_atlas_networks ( networks_content, networks_filename, atlas_filename ):
 
-    cubes_filename = os.path.abspath ( networks_filename ).replace ( "_gmnet.nii", "_cubes.nii" );
     new_atfilename = os.path.abspath ( atlas_filename ).replace ( ".nii", "_mni.nii"   );
+    cubes_filename = os.path.abspath ( networks_filename ).replace ( "_gmnet.nii", "_cubes.nii" );
     
     # newgm_content = np.asarray ( nib.load ( new_gmfilename ).dataobj ); # load mni-resampled gm file
     atlas_content   = np.asarray ( nib.load ( new_atfilename ).dataobj ); # loat mni-resampled atlas file
     cube_content    = np.asarray ( nib.load ( cubes_filename ).dataobj ); # loat cube indices file
 
     # array of cube indices in used voxels (beware 'where' numbering starts at x=0, cube indices start at z=0)
-    cube_indices  = cube_content  [ np.where ( cube_content > 0 ) ];
-    atlas_indices = atlas_content [ np.where ( cube_content > 0 ) ];
+    atlas_indices = atlas_content [ (  np.isfinite ( cube_content )  &  ( cube_content > 0 )  ) ];
+    cube_indices  = cube_content  [ (  np.isfinite ( cube_content )  &  ( cube_content > 0 )  ) ];
 
     # select to which atlas region each cube belongs (winner takes all: region with most coefficients)
     atl_size  = int ( np.max ( atlas_content ) );

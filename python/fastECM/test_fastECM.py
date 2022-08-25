@@ -8,4 +8,5 @@ Created on Fri Feb  3 14:27:49 2017
 from fastECM import fastECM
 
 fastECM(inputfile='/home/amwink/Software/bias/python/fastECM/fmri4d.nii.gz',
-        maskfile='/home/amwink/Software/bias/python/fastECM/mask_csf.nii.gz')
+        maskfile='/home/amwink/Software/bias/python/fastECM/mask_csf.nii.gz',
+        atlasfile='/home/amwink/Software/bias/python/fastECM/aal_MNI_V4_4mm_gong.nii.gz')

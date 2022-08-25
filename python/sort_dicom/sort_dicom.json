@@ -1,0 +1,82 @@
+{
+
+  "sets":
+
+  [
+
+    { "Name": "ScanningSequence",  "Values": [ "GR", "SE" ]                                          },
+    { "Name": "Manufacturer",      "Values": [ "GE MEDICAL SYSTEMS", "Siemens", "Philips", "Canon" ] }
+
+  ], 
+
+  "protocols":
+
+  [     
+	
+    { "Name":              { "free": "FLAIR 3D"                 },
+      "Manufacturer":      { "set" : "GE MEDICAL SYSTEMS"       },
+      "EchoTime":          { "min" : "100",      "max": "500"   },
+      "InversionTime":     { "min" : "1600",     "max": "2100"  },
+      "RepetitionTime":    { "min" : "5000",     "max": "9000"  },
+      "ScanningSequence":  { "set" : "SE"                       } },
+     
+    { "Name":              { "free": "T1w 3D"                   },
+      "Manufacturer":      { "set" : "GE MEDICAL SYSTEMS"       },
+      "EchoTime":          { "min" : "2",        "max": "9"     },
+      "InversionTime":     { "min" : "350",      "max": "650"   },
+      "RepetitionTime":    { "min" : "5",        "max": "10"    },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "SWI"                      },
+      "Manufacturer":      { "set" : "GE MEDICAL SYSTEMS"       },
+      "EchoTime":          { "min" : "20",       "max": "30"    },
+      "RepetitionTime":    { "min" : "25",       "max": "40"    },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "fMRI"                     },
+      "Manufacturer":      { "set" : "GE MEDICAL SYSTEMS"       },
+      "EchoTime":          { "min" : "20",       "max": "35"    },
+      "RepetitionTime":    { "min" : "1000",     "max": "3000"  },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "DTI"                      },
+      "Manufacturer":      { "set" : "GE MEDICAL SYSTEMS"       },
+      "EchoTime":          { "min" : "60",       "max": "120"   },
+      "RepetitionTime":    { "min" : "3000",     "max": "10000" },
+      "ScanningSequence":  { "set" : "SE"                       } },
+
+    { "Name":              { "free": "FLAIR 3D"                 },
+      "Manufacturer":      { "set" : "Siemens"                  },
+      "EchoTime":          { "min" : "100",      "max": "500"   },
+      "InversionTime":     { "min" : "1600",     "max": "2100"  },
+      "RepetitionTime":    { "min" : "5000",     "max": "9000"  },
+      "ScanningSequence":  { "set" : "SE"                       } },
+     
+    { "Name":              { "free": "T1w 3D"                   },
+      "Manufacturer":      { "set" : "Siemens"                  },
+      "EchoTime":          { "min" : "2",        "max": "4"     },
+      "InversionTime":     { "min" : "800",      "max": "1000"  },
+      "RepetitionTime":    { "min" : "2000",     "max": "3000"  },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "SWI"                      },
+      "Manufacturer":      { "set" : "Siemens"                  },
+      "EchoTime":          { "min" : "20",       "max": "30"    },
+      "RepetitionTime":    { "min" : "25",       "max": "40"    },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "fMRI"                     },
+      "Manufacturer":      { "set" : "Siemens"                  },
+      "EchoTime":          { "min" : "20",       "max": "35"    },
+      "RepetitionTime":    { "min" : "1000",     "max": "3000"  },
+      "ScanningSequence":  { "set" : "GR"                       } },
+     
+    { "Name":              { "free": "DTI"                      },
+      "Manufacturer":      { "set" : "Siemens"                  },
+      "EchoTime":          { "min" : "60",       "max": "120"   },
+      "RepetitionTime":    { "min" : "3000",     "max": "10000" },
+      "ScanningSequence":  { "set" : "SE"                       } }
+
+  ]
+
+}
